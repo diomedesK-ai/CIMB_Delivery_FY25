@@ -32,10 +32,11 @@ import { Button } from "@/components/ui/button"
 
 export function SidebarNavigation({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const [activePath, setActivePath] = useState(pathname)
+  const [activePath, setActivePath] = useState(pathname === "/" ? "/gtd-dashboard" : pathname)
 
   useEffect(() => {
-    setActivePath(pathname)
+    // If we're on the root path, consider GTD Dashboard as active since it redirects there
+    setActivePath(pathname === "/" ? "/gtd-dashboard" : pathname)
   }, [pathname])
 
   return (
@@ -69,10 +70,10 @@ export function SidebarNavigation({ children }: { children: React.ReactNode }) {
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   asChild 
-                  isActive={activePath === "/"}
-                  className={activePath === "/" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
+                  isActive={activePath === "/microsoft"}
+                  className={activePath === "/microsoft" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
                 >
-                  <Link href="/">
+                  <Link href="/microsoft">
                     <LayoutDashboard className="h-5 w-5" />
                     <span>Microsoft</span>
                   </Link>
