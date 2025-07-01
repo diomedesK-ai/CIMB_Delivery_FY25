@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Pencil, Check, X } from "lucide-react"
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
 import type { GTDItem } from "@/app/gtd-dashboard/page"
 
 interface GTDTableProps {
@@ -32,7 +33,7 @@ interface GTDTableProps {
 export function GTDTable({ items, onUpdateProgress, onUpdateItem }: GTDTableProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<Partial<GTDItem>>({})
-  const [groupBy, setGroupBy] = useState<'theme' | 'category' | 'progress'>('theme')
+  const [groupBy, setGroupBy] = useState<'theme' | 'category' | 'progress' | 'assignee'>('theme')
 
   const getCategoryColor = (category: GTDItem['category']) => {
     switch (category) {
@@ -62,7 +63,7 @@ export function GTDTable({ items, onUpdateProgress, onUpdateItem }: GTDTableProp
 
   const groupedItems = useMemo(() => {
     const groups = items.reduce((acc, item) => {
-      const key = item[groupBy]
+      const key = groupBy === 'assignee' ? item.assignee : item[groupBy as keyof GTDItem]
       if (!acc[key]) {
         acc[key] = []
       }
@@ -84,6 +85,28 @@ export function GTDTable({ items, onUpdateProgress, onUpdateItem }: GTDTableProp
       }
     }))
   }, [items, groupBy])
+
+  const themeProgressData = useMemo(() => {
+    const themes = ['T1: Strong Foundation', 'T2: Embracing the New', 'T3: Digital Strategy', 'T4: Way of Working', 'T5: Team & Culture']
+    
+    return themes.map(theme => {
+      const themeItems = items.filter(item => item.theme === theme)
+      const onTrack = themeItems.filter(item => item.progress === 'on track').length
+      const delayed = themeItems.filter(item => item.progress === 'delayed').length
+      const notStarted = themeItems.filter(item => item.progress === 'not started').length
+      
+      const chartData = []
+      if (onTrack > 0) chartData.push({ name: 'On Track', value: onTrack, color: '#10B981' })
+      if (notStarted > 0) chartData.push({ name: 'Not Started', value: notStarted, color: '#F59E0B' })
+      if (delayed > 0) chartData.push({ name: 'Delayed', value: delayed, color: '#EF4444' })
+      
+      return {
+        theme: theme.replace(/^T\d+:\s*/, ''), // Remove T1:, T2: etc prefix
+        data: chartData,
+        total: themeItems.length
+      }
+    }).filter(theme => theme.total > 0) // Only show themes with data
+  }, [items])
 
   const overallCounts = useMemo(() => ({
     total: items.length,
@@ -114,69 +137,149 @@ export function GTDTable({ items, onUpdateProgress, onUpdateItem }: GTDTableProp
   }
 
   return (
-    <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Initiatives</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{overallCounts.total}</div>
+    <div className="space-y-8">
+      {/* Executive KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white">
+          <CardContent className="p-8 text-center">
+            <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3">Conceptual</h3>
+            <div className="text-5xl font-bold text-gray-900 mb-2">
+              {overallCounts.total > 0 ? Math.round((overallCounts.conceptual / overallCounts.total) * 100) : 0}<span className="text-3xl">%</span>
+            </div>
+            <div className="text-xs text-gray-500 font-bold">{overallCounts.conceptual} initiatives</div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Categories</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-1 text-sm">
-              <div>Conceptual: {overallCounts.conceptual}</div>
-              <div>Implementation: {overallCounts.implementation}</div>
-              <div>Planning: {overallCounts.planning}</div>
+        <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white">
+          <CardContent className="p-8 text-center">
+            <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3">Planning</h3>
+            <div className="text-5xl font-bold text-gray-900 mb-2">
+              {overallCounts.total > 0 ? Math.round((overallCounts.planning / overallCounts.total) * 100) : 0}<span className="text-3xl">%</span>
             </div>
+            <div className="text-xs text-gray-500 font-bold">{overallCounts.planning} initiatives</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Progress</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-1 text-sm">
-              <div>On Track: {overallCounts.onTrack}</div>
-              <div>Delayed: {overallCounts.delayed}</div>
-              <div>Not Started: {overallCounts.notStarted}</div>
+        <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white">
+          <CardContent className="p-8 text-center">
+            <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3">Implementation</h3>
+            <div className="text-5xl font-bold text-gray-900 mb-2">
+              {overallCounts.total > 0 ? Math.round((overallCounts.implementation / overallCounts.total) * 100) : 0}<span className="text-3xl">%</span>
             </div>
+            <div className="text-xs text-gray-500 font-bold">{overallCounts.implementation} initiatives</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {Math.round((overallCounts.onTrack / overallCounts.total) * 100)}%
+        <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white">
+          <CardContent className="p-8 text-center">
+            <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3">Monitoring</h3>
+            <div className="text-5xl font-bold text-gray-900 mb-2">
+              0<span className="text-3xl">%</span>
+            </div>
+            <div className="text-xs text-gray-500 font-bold">0 initiatives</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Executive Summary */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+        <Card className="border border-gray-200 shadow-sm bg-white">
+          <CardContent className="p-6 text-center">
+            <div className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-2">Total Initiatives</div>
+            <div className="text-3xl font-bold text-gray-900">{overallCounts.total}</div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border border-gray-200 shadow-sm bg-white">
+          <CardContent className="p-6 text-center">
+            <div className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-2">On Track</div>
+            <div className="text-3xl font-bold text-green-600">{overallCounts.onTrack}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="border border-gray-200 shadow-sm bg-white">
+          <CardContent className="p-6 text-center">
+            <div className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-2">Completion Rate</div>
+            <div className="text-3xl font-bold text-gray-900">
+              {Math.round((overallCounts.onTrack / overallCounts.total) * 100)}<span className="text-xl">%</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Group By Controls */}
-      <div className="flex items-center gap-4">
-        <label htmlFor="groupBy" className="text-sm font-medium">Group by:</label>
-        <Select value={groupBy} onValueChange={(value: 'theme' | 'category' | 'progress') => setGroupBy(value)}>
-          <SelectTrigger className="w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="theme">Theme</SelectItem>
-            <SelectItem value="category">Category</SelectItem>
-            <SelectItem value="progress">Progress</SelectItem>
-          </SelectContent>
-        </Select>
+            {/* Theme Progress Circles */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+        {themeProgressData.map((themeData, index) => (
+          <Card key={index} className="border border-gray-200 shadow-sm bg-white">
+            <CardContent className="p-6 text-center">
+              <h3 className="text-sm font-medium text-gray-700 mb-4">{themeData.theme}</h3>
+              <div className="relative w-32 h-32 mx-auto mb-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={themeData.data}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={60}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {themeData.data.map((entry, entryIndex) => (
+                        <Cell key={`cell-${entryIndex}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-1 text-xs">
+                {themeData.data.map((entry, entryIndex) => (
+                  <div key={entryIndex} className="flex items-center justify-start gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: entry.color }}
+                    ></div>
+                    <span className="text-gray-600">{entry.name}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Executive Filter Controls */}
+      <div className="flex justify-center gap-2 mb-8">
+        <button
+          onClick={() => setGroupBy('assignee')}
+          className={`px-8 py-3 text-sm font-medium rounded-md transition-all duration-200 ${
+            groupBy === 'assignee' 
+              ? 'bg-gray-900 text-white shadow-sm' 
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          By Owner
+        </button>
+        <button
+          onClick={() => setGroupBy('theme')}
+          className={`px-8 py-3 text-sm font-medium rounded-md transition-all duration-200 ${
+            groupBy === 'theme' 
+              ? 'bg-gray-900 text-white shadow-sm' 
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          By Themes
+        </button>
+        <button
+          onClick={() => setGroupBy('progress')}
+          className={`px-8 py-3 text-sm font-medium rounded-md transition-all duration-200 ${
+            groupBy === 'progress' 
+              ? 'bg-gray-900 text-white shadow-sm' 
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          By Progress
+        </button>
       </div>
 
       {/* Grouped Tables */}
@@ -185,12 +288,12 @@ export function GTDTable({ items, onUpdateProgress, onUpdateItem }: GTDTableProp
           <Card key={groupName}>
             <CardHeader>
               <CardTitle className="text-lg">{groupName}</CardTitle>
-              <CardDescription>
-                {counts.total} initiatives • 
-                Conceptual: {counts.conceptual} • 
-                Implementation: {counts.implementation} • 
-                Planning: {counts.planning}
-              </CardDescription>
+                          <CardDescription>
+              <span className="font-bold">{counts.total}</span> initiatives • 
+              Conceptual: <span className="font-bold">{counts.conceptual}</span> • 
+              Implementation: <span className="font-bold">{counts.implementation}</span> • 
+              Planning: <span className="font-bold">{counts.planning}</span>
+            </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="rounded-md border">
