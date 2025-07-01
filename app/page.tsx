@@ -12,9 +12,9 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Executive Overview</h2>
-          <p className="text-muted-foreground">Track AI initiatives, dependencies, and value creation across Maybank</p>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">AI Value Map Dashboard</h1>
+          <p className="text-muted-foreground">Track AI initiatives, dependencies, and value creation</p>
         </div>
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" className="hidden gap-1 sm:flex">

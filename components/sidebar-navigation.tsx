@@ -2,8 +2,9 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +16,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { MaybankLogo } from "@/components/maybank-logo"
 import {
   LayoutDashboard,
   Calendar,
@@ -31,29 +31,59 @@ import {
 import { Button } from "@/components/ui/button"
 
 export function SidebarNavigation({ children }: { children: React.ReactNode }) {
-  const [activePath] = useState("/")
+  const pathname = usePathname()
+  const [activePath, setActivePath] = useState(pathname)
+
+  useEffect(() => {
+    setActivePath(pathname)
+  }, [pathname])
 
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen">
         <Sidebar>
           <SidebarHeader className="border-b pb-2">
-            <div className="flex items-center gap-2 px-4 py-2">
-              <MaybankLogo />
+            <div className="flex items-center gap-3 px-4 py-3">
+              <img 
+                src="/images/maybank-emblem.png" 
+                alt="Maybank Logo" 
+                className="h-10 w-10 object-contain"
+              />
+              <div className="font-semibold text-lg text-gray-800">Maybank</div>
             </div>
           </SidebarHeader>
           <SidebarContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={activePath === "/"}>
-                  <Link href="/">
-                    <LayoutDashboard className="h-5 w-5" />
-                    <span>Dashboard</span>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={activePath === "/gtd-dashboard"}
+                  className={activePath === "/gtd-dashboard" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
+                >
+                  <Link href="/gtd-dashboard">
+                    <BarChart3 className="h-5 w-5" />
+                    <span>GTD Dashboard</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={activePath === "/timeline"}>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={activePath === "/"}
+                  className={activePath === "/" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
+                >
+                  <Link href="/">
+                    <LayoutDashboard className="h-5 w-5" />
+                    <span>Microsoft</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={activePath === "/timeline"}
+                  className={activePath === "/timeline" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
+                >
                   <Link href="/timeline">
                     <Calendar className="h-5 w-5" />
                     <span>Timeline</span>
@@ -61,7 +91,11 @@ export function SidebarNavigation({ children }: { children: React.ReactNode }) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={activePath === "/use-cases"}>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={activePath === "/use-cases"}
+                  className={activePath === "/use-cases" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
+                >
                   <Link href="/use-cases">
                     <Lightbulb className="h-5 w-5" />
                     <span>Use Cases</span>
@@ -73,7 +107,11 @@ export function SidebarNavigation({ children }: { children: React.ReactNode }) {
           <SidebarFooter className="border-t">
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={activePath === "/settings"}>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={activePath === "/settings"}
+                  className={activePath === "/settings" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
+                >
                   <Link href="/settings">
                     <Settings className="h-5 w-5" />
                     <span>Settings</span>
@@ -81,7 +119,11 @@ export function SidebarNavigation({ children }: { children: React.ReactNode }) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={activePath === "/help"}>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={activePath === "/help"}
+                  className={activePath === "/help" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
+                >
                   <Link href="/help">
                     <HelpCircle className="h-5 w-5" />
                     <span>Help</span>
