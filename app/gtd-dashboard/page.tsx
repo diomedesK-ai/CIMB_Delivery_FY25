@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Download, FileIcon as FilePresentation, Filter } from "lucide-react"
 import { GTDTable } from "@/components/gtd-table"
 import { CompletionChart } from "@/components/completion-chart"
+import { ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 
 export interface GTDItem {
   id: string
@@ -307,8 +308,36 @@ export default function GTDDashboard() {
     )
   }
 
+  // Calculate counts for Task Management section
+  const overallCounts = {
+    total: items.length,
+    conceptual: items.filter(item => item.category === 'conceptual').length,
+    implementation: items.filter(item => item.category === 'implementation').length,
+    planning: items.filter(item => item.category === 'planning').length,
+    onTrack: items.filter(item => item.progress === 'on track').length,
+  }
+
+  // Theme progress data for circular charts
+  const themes = ['T1: Strong Foundation', 'T2: Embracing the New', 'T3: Digital Strategy', 'T4: Way of Working', 'T5: Team & Culture']
+  const themeProgressData = themes.map(theme => {
+    const themeItems = items.filter(item => item.theme === theme)
+    const onTrack = themeItems.filter(item => item.progress === 'on track').length
+    const notStarted = themeItems.filter(item => item.progress === 'not started').length  
+    const delayed = themeItems.filter(item => item.progress === 'delayed').length
+
+    return {
+      theme: theme.replace('T1: ', '').replace('T2: ', '').replace('T3: ', '').replace('T4: ', '').replace('T5: ', ''),
+      data: [
+        { name: 'On Track', value: onTrack || 0, color: '#10B981' },
+        { name: 'Not Started', value: notStarted || 0, color: '#F59E0B' },
+        { name: 'Delayed', value: delayed || 0, color: '#EF4444' }
+      ].filter(item => item.value > 0)
+    }
+  })
+
   return (
     <div className="space-y-6">
+      {/* GTD Dashboard Header - At the Very Top */}
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">GTD Dashboard</h1>
@@ -329,6 +358,124 @@ export default function GTDDashboard() {
           </Button>
         </div>
       </div>
+
+      {/* Real Time Exec KPIs Section */}
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Real Time Exec KPIs</h2>
+          <p className="text-gray-600 mb-8">Edit task status and details in real-time</p>
+        </div>
+
+        {/* Executive KPI Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white">
+            <CardContent className="p-8 text-center">
+              <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3">Conceptual</h3>
+              <div className="text-5xl font-bold text-gray-900 mb-2">
+                {overallCounts.total > 0 ? Math.round((overallCounts.conceptual / overallCounts.total) * 100) : 0}<span className="text-3xl">%</span>
+              </div>
+              <div className="text-xs text-gray-500 font-bold">{overallCounts.conceptual} initiatives</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white">
+            <CardContent className="p-8 text-center">
+              <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3">Planning</h3>
+              <div className="text-5xl font-bold text-gray-900 mb-2">
+                {overallCounts.total > 0 ? Math.round((overallCounts.planning / overallCounts.total) * 100) : 0}<span className="text-3xl">%</span>
+              </div>
+              <div className="text-xs text-gray-500 font-bold">{overallCounts.planning} initiatives</div>
+            </CardContent>
+          </Card>
+
+          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white">
+            <CardContent className="p-8 text-center">
+              <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3">Implementation</h3>
+              <div className="text-5xl font-bold text-gray-900 mb-2">
+                {overallCounts.total > 0 ? Math.round((overallCounts.implementation / overallCounts.total) * 100) : 0}<span className="text-3xl">%</span>
+              </div>
+              <div className="text-xs text-gray-500 font-bold">{overallCounts.implementation} initiatives</div>
+            </CardContent>
+          </Card>
+
+          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white">
+            <CardContent className="p-8 text-center">
+              <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3">Monitoring</h3>
+              <div className="text-5xl font-bold text-gray-900 mb-2">
+                0<span className="text-3xl">%</span>
+              </div>
+              <div className="text-xs text-gray-500 font-bold">0 initiatives</div>
+            </CardContent>
+          </Card>
+        </div>
+
+                 {/* Executive Summary */}
+         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+           <Card className="border border-gray-200 shadow-sm bg-white">
+             <CardContent className="p-6 text-center">
+               <div className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-2">Total Initiatives</div>
+               <div className="text-3xl font-bold text-gray-900">{overallCounts.total}</div>
+             </CardContent>
+           </Card>
+           
+           <Card className="border border-gray-200 shadow-sm bg-white">
+             <CardContent className="p-6 text-center">
+               <div className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-2">On Track</div>
+               <div className="text-3xl font-bold text-green-600">{overallCounts.onTrack}</div>
+             </CardContent>
+           </Card>
+
+           <Card className="border border-gray-200 shadow-sm bg-white">
+             <CardContent className="p-6 text-center">
+               <div className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-2">Completion Rate</div>
+               <div className="text-3xl font-bold text-gray-900">
+                 {Math.round((overallCounts.onTrack / overallCounts.total) * 100)}<span className="text-xl">%</span>
+               </div>
+             </CardContent>
+           </Card>
+         </div>
+
+         {/* Theme Progress Circles */}
+         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+           {themeProgressData.map((themeData, index) => (
+             <Card key={index} className="border border-gray-200 shadow-sm bg-white">
+               <CardContent className="p-6 text-center">
+                 <h3 className="text-sm font-medium text-gray-700 mb-4">{themeData.theme}</h3>
+                 <div className="relative w-32 h-32 mx-auto mb-4">
+                   <ResponsiveContainer width="100%" height="100%">
+                     <PieChart>
+                       <Pie
+                         data={themeData.data}
+                         cx="50%"
+                         cy="50%"
+                         innerRadius={40}
+                         outerRadius={60}
+                         paddingAngle={2}
+                         dataKey="value"
+                       >
+                         {themeData.data.map((entry, entryIndex) => (
+                           <Cell key={`cell-${entryIndex}`} fill={entry.color} />
+                         ))}
+                       </Pie>
+                     </PieChart>
+                   </ResponsiveContainer>
+                 </div>
+                 <div className="space-y-1 text-xs">
+                   {themeData.data.map((entry, entryIndex) => (
+                     <div key={entryIndex} className="flex items-center justify-start gap-2">
+                       <div 
+                         className="w-3 h-3 rounded-full" 
+                         style={{ backgroundColor: entry.color }}
+                       ></div>
+                       <span className="text-gray-600">{entry.name}</span>
+                     </div>
+                   ))}
+                 </div>
+               </CardContent>
+             </Card>
+           ))}
+         </div>
+       </div>
 
       <div className="grid gap-6">
         {/* Completion Chart */}
