@@ -29,10 +29,12 @@ import {
   LogOut,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/lib/auth"
 
 export function SidebarNavigation({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [activePath, setActivePath] = useState(pathname === "/" ? "/gtd-dashboard" : pathname)
+  const { logout } = useAuth()
 
   useEffect(() => {
     // If we're on the root path, consider GTD Dashboard as active since it redirects there
@@ -133,7 +135,12 @@ export function SidebarNavigation({ children }: { children: React.ReactNode }) {
               </SidebarMenuItem>
             </SidebarMenu>
             <div className="p-4">
-              <Button variant="outline" className="w-full justify-start" size="sm">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start" 
+                size="sm"
+                onClick={logout}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out
               </Button>

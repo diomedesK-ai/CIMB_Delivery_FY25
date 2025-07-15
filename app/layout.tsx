@@ -1,11 +1,26 @@
+'use client';
+
 import type React from "react"
 import "@/app/globals.css"
 import { SidebarNavigation } from "@/components/sidebar-navigation"
+import { AuthProvider, useAuth } from "@/lib/auth"
+import ProtectedRoute from "@/components/protected-route"
+import { usePathname } from 'next/navigation'
+import Head from 'next/head'
 
-export const metadata = {
-  title: "Maybank AI Value Map Dashboard",
-  description: "Track AI initiatives, dependencies, and value creation across Maybank",
-    generator: 'v0.dev'
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === '/login';
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
+  return (
+    <ProtectedRoute>
+      <SidebarNavigation>{children}</SidebarNavigation>
+    </ProtectedRoute>
+  );
 }
 
 export default function RootLayout({
@@ -15,8 +30,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>
+        <title>Maybank AI Value Map Dashboard</title>
+        <meta name="description" content="Track AI initiatives, dependencies, and value creation across Maybank" />
+        <meta name="generator" content="v0.dev" />
+      </Head>
       <body>
-        <SidebarNavigation>{children}</SidebarNavigation>
+        <AuthProvider>
+          <LayoutContent>{children}</LayoutContent>
+        </AuthProvider>
       </body>
     </html>
   )
