@@ -6,7 +6,6 @@ import { SidebarNavigation } from "@/components/sidebar-navigation"
 import { AuthProvider, useAuth } from "@/lib/auth"
 import ProtectedRoute from "@/components/protected-route"
 import { usePathname } from 'next/navigation'
-import Head from 'next/head'
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -30,11 +29,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Head>
+      <head>
         <title>Maybank AI Value Map Dashboard</title>
         <meta name="description" content="Track AI initiatives, dependencies, and value creation across Maybank" />
         <meta name="generator" content="v0.dev" />
-      </Head>
+      </head>
       <body>
         <AuthProvider>
           <LayoutContent>{children}</LayoutContent>
