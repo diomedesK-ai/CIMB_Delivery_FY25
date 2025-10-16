@@ -61,8 +61,8 @@ const config = {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        maybank: {
-          yellow: "#FFC107",
+        cimb: {
+          red: "#DC2626",
           dark: "#111111",
         },
       },

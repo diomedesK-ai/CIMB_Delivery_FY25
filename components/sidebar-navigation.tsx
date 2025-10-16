@@ -26,19 +26,22 @@ import {
   Users,
   Layers,
   Lightbulb,
+  Database,
   LogOut,
+  Calculator,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth"
+import { UniversalSearch } from "@/components/universal-search"
 
 export function SidebarNavigation({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const [activePath, setActivePath] = useState(pathname === "/" ? "/gtd-dashboard" : pathname)
+  const [activePath, setActivePath] = useState(pathname === "/" ? "/microsoft" : pathname)
   const { logout } = useAuth()
 
   useEffect(() => {
-    // If we're on the root path, consider GTD Dashboard as active since it redirects there
-    setActivePath(pathname === "/" ? "/gtd-dashboard" : pathname)
+    // If we're on the root path, consider Microsoft as active since it redirects there
+    setActivePath(pathname === "/" ? "/microsoft" : pathname)
   }, [pathname])
 
   return (
@@ -48,11 +51,11 @@ export function SidebarNavigation({ children }: { children: React.ReactNode }) {
           <SidebarHeader className="border-b pb-2">
             <div className="flex items-center gap-3 px-4 py-3">
               <img 
-                src="/images/maybank-emblem.png" 
-                alt="Maybank Logo" 
+                src="/images/cimb-emblem.jpg" 
+                alt="CIMB Logo" 
                 className="h-10 w-10 object-contain"
               />
-              <div className="font-semibold text-lg text-gray-800">Maybank</div>
+              <div className="font-semibold text-lg text-gray-800">CIMB</div>
             </div>
           </SidebarHeader>
           <SidebarContent>
@@ -60,12 +63,12 @@ export function SidebarNavigation({ children }: { children: React.ReactNode }) {
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   asChild 
-                  isActive={activePath === "/gtd-dashboard"}
-                  className={activePath === "/gtd-dashboard" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
+                  isActive={activePath === "/functions"}
+                  className={activePath === "/functions" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
                 >
-                  <Link href="/gtd-dashboard">
-                    <BarChart3 className="h-5 w-5" />
-                    <span>GTD Dashboard</span>
+                  <Link href="/functions">
+                    <Layers className="h-5 w-5" />
+                    <span>Strategic Functions</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -77,19 +80,19 @@ export function SidebarNavigation({ children }: { children: React.ReactNode }) {
                 >
                   <Link href="/microsoft">
                     <LayoutDashboard className="h-5 w-5" />
-                    <span>Microsoft</span>
+                    <span>AI Clusters</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   asChild 
-                  isActive={activePath === "/timeline"}
-                  className={activePath === "/timeline" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
+                  isActive={activePath === "/executive-timeline"}
+                  className={activePath === "/executive-timeline" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
                 >
-                  <Link href="/timeline">
+                  <Link href="/executive-timeline">
                     <Calendar className="h-5 w-5" />
-                    <span>Timeline</span>
+                    <span>Strategic Timeline</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -105,10 +108,46 @@ export function SidebarNavigation({ children }: { children: React.ReactNode }) {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={activePath === "/roi-calculator"}
+                  className={activePath === "/roi-calculator" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
+                >
+                  <Link href="/roi-calculator">
+                    <Calculator className="h-5 w-5" />
+                    <span>ROI Calculator</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={activePath === "/use-cases/manage"}
+                  className={activePath === "/use-cases/manage" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
+                >
+                  <Link href="/use-cases/manage">
+                    <Database className="h-5 w-5" />
+                    <span>Manage Master Data</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter className="border-t">
             <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={activePath === "/methodology"}
+                  className={activePath === "/methodology" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
+                >
+                  <Link href="/methodology">
+                    <FileText className="h-5 w-5" />
+                    <span>Methodology & Sources</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   asChild 
@@ -148,9 +187,11 @@ export function SidebarNavigation({ children }: { children: React.ReactNode }) {
           </SidebarFooter>
         </Sidebar>
         <div className="flex-1">
-          <div className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
+          <div className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-white px-4 sm:px-6">
             <SidebarTrigger />
-            <div className="flex-1" />
+            <div className="flex-1 flex justify-start">
+              <UniversalSearch />
+            </div>
           </div>
           <div className="p-4 sm:p-6 md:p-8">{children}</div>
         </div>

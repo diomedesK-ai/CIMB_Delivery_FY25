@@ -2,7 +2,7 @@
 
 import { Calendar } from "@/components/ui/calendar"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -17,12 +17,17 @@ import {
   Code,
   Shield,
   FileText,
+  Building2,
+  Target,
 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useMasterData } from "@/hooks/use-master-data"
+import { UseCaseRecord } from "@/lib/csv-parser"
 
 export function UseCaseCards() {
   const [selectedArea, setSelectedArea] = useState("all")
   const [selectedUseCase, setSelectedUseCase] = useState<string | null>(null)
+  const { useCases: masterUseCases, isLoading, error } = useMasterData()
 
   const useCases = [
     // Personal Productivity Use Cases - M365 Copilot
@@ -375,10 +380,47 @@ export function UseCaseCards() {
     }
   }
 
+  // Merge master CSV data with legacy use cases
+  const enrichedUseCases = useCases.map((useCase) => {
+    // Find matching CSV record by name similarity
+    const csvMatch = masterUseCases.find((csvUC) => 
+      csvUC.useCase.toLowerCase().includes(useCase.name.toLowerCase().split(' - ')[1]?.toLowerCase() || '') ||
+      useCase.name.toLowerCase().includes(csvUC.useCase.toLowerCase())
+    );
+
+    return {
+      ...useCase,
+      csvDepartments: csvMatch?.departments || [],
+      csvKpis: csvMatch?.kpis || [],
+      csvMicrosoftProducts: csvMatch?.microsoftProducts || [],
+      csvGroup: csvMatch?.group || '',
+      csvSubCategory: csvMatch?.subCategory || '',
+    };
+  });
+
   const filteredUseCases =
     selectedArea === "all"
-      ? useCases
-      : useCases.filter((useCase) => useCase.area === selectedArea || useCase.category === selectedArea)
+      ? enrichedUseCases
+      : enrichedUseCases.filter((useCase) => useCase.area === selectedArea || useCase.category === selectedArea)
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading use cases from master data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <strong>Error:</strong> {error}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -427,6 +469,64 @@ export function UseCaseCards() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Department Dependencies from CSV */}
+                  {useCase.csvDepartments && useCase.csvDepartments.length > 0 && (
+                    <div className="mt-3">
+                      <div className="flex items-center gap-1 mb-1">
+                        <Building2 className="h-3 w-3 text-muted-foreground" />
+                        <p className="text-xs font-medium">Departments:</p>
+                      </div>
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {useCase.csvDepartments.slice(0, 3).map((dept, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                            {dept}
+                          </Badge>
+                        ))}
+                        {useCase.csvDepartments.length > 3 && (
+                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                            +{useCase.csvDepartments.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* KPIs from CSV */}
+                  {useCase.csvKpis && useCase.csvKpis.length > 0 && (
+                    <div className="mt-3">
+                      <div className="flex items-center gap-1 mb-1">
+                        <Target className="h-3 w-3 text-muted-foreground" />
+                        <p className="text-xs font-medium">Primary KPIs:</p>
+                      </div>
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {useCase.csvKpis.map((kpi, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                            {kpi}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Microsoft Products from CSV */}
+                  {useCase.csvMicrosoftProducts && useCase.csvMicrosoftProducts.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs font-medium mb-1">Microsoft Products:</p>
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {useCase.csvMicrosoftProducts.slice(0, 2).map((product, idx) => (
+                          <span key={idx} className="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-200">
+                            {product}
+                          </span>
+                        ))}
+                        {useCase.csvMicrosoftProducts.length > 2 && (
+                          <span className="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-200">
+                            +{useCase.csvMicrosoftProducts.length - 2} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     <div className="rounded-md bg-muted p-2">
@@ -512,6 +612,55 @@ export function UseCaseCards() {
                           </li>
                         ))}
                       </ul>
+
+                      {/* CSV Department Dependencies */}
+                      {useCase.csvDepartments && useCase.csvDepartments.length > 0 && (
+                        <>
+                          <h4 className="text-sm font-semibold mt-4 mb-2 flex items-center gap-1">
+                            <Building2 className="h-4 w-4" />
+                            Department Dependencies
+                          </h4>
+                          <div className="flex flex-wrap gap-1">
+                            {useCase.csvDepartments.map((dept, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                {dept}
+                              </Badge>
+                            ))}
+                          </div>
+                        </>
+                      )}
+
+                      {/* CSV KPIs */}
+                      {useCase.csvKpis && useCase.csvKpis.length > 0 && (
+                        <>
+                          <h4 className="text-sm font-semibold mt-4 mb-2 flex items-center gap-1">
+                            <Target className="h-4 w-4" />
+                            Primary KPIs
+                          </h4>
+                          <div className="space-y-1">
+                            {useCase.csvKpis.map((kpi, idx) => (
+                              <div key={idx} className="flex items-center gap-2 text-sm">
+                                <div className="h-2 w-2 rounded-full bg-green-500" />
+                                {kpi}
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+
+                      {/* CSV Microsoft Products */}
+                      {useCase.csvMicrosoftProducts && useCase.csvMicrosoftProducts.length > 0 && (
+                        <>
+                          <h4 className="text-sm font-semibold mt-4 mb-2">Microsoft Products</h4>
+                          <div className="flex flex-wrap gap-1">
+                            {useCase.csvMicrosoftProducts.map((product, idx) => (
+                              <span key={idx} className="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-200">
+                                {product}
+                              </span>
+                            ))}
+                          </div>
+                        </>
+                      )}
 
                       <h4 className="text-sm font-semibold mt-4 mb-2">Prerequisites</h4>
                       <p className="text-sm">{useCase.prerequisites}</p>

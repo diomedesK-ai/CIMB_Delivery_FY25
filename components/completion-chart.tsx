@@ -133,7 +133,7 @@ export function CompletionChart({ items }: CompletionChartProps) {
     <div className="space-y-6">
       {/* Debug Info */}
       {items.length === 0 && (
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           <strong>Debug:</strong> No items found. Total items: {items.length}
         </div>
       )}

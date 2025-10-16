@@ -7,15 +7,15 @@ export default function HomePage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Redirect to GTD Dashboard as the default page
-    router.replace("/gtd-dashboard")
+    // Redirect to Microsoft tab as the default page
+    router.replace("/microsoft")
   }, [router])
 
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
-        <h2 className="text-lg font-semibold mb-2">Redirecting to GTD Dashboard...</h2>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <h2 className="text-lg font-semibold mb-2">Loading...</h2>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
       </div>
     </div>
   )

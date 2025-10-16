@@ -71,7 +71,8 @@ interface AIUseCase {
   status: string
   icon: React.ComponentType
   benefits: string
-  prerequisites: string
+  criticalSystems: string
+  subsystems: string[]
 }
 
 type TimelineItem = WorkstreamItem | AIUseCase
@@ -90,6 +91,7 @@ export function AIValueGantt() {
   const [filterText, setFilterText] = useState("")
   const [selectedUseCase, setSelectedUseCase] = useState<string | null>(null)
   const [selectedWorkstream, setSelectedWorkstream] = useState<WorkstreamItem | null>(null)
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
   // T0 date (July 1, 2025)
   const t0Date = new Date(2025, 6, 1)
@@ -457,7 +459,7 @@ export function AIValueGantt() {
       start: 9, // Month 9
       duration: 3, // 3 months
       status: "planned",
-      phase: "maybank",
+      phase: "cimb",
       dependencies: ["ai-genai"],
       milestone: true,
       description: "Implementation of customer-facing chatbot for contact center",
@@ -629,7 +631,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: MessageSquare,
       benefits: "30% reduction in email processing time, improved communication quality",
-      prerequisites: "M365 Copilot license, user training, data compliance",
+      criticalSystems: "M365 Copilot license, user training, data compliance",
+      subsystems: ["Microsoft 365 Copilot", "Azure OpenAI Service", "Exchange Online"],
     },
     {
       id: "copilot-m365-meetings",
@@ -642,7 +645,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: Calendar,
       benefits: "25% reduction in meeting follow-up time, improved action tracking",
-      prerequisites: "M365 Copilot license, Teams deployment, user training",
+      criticalSystems: "M365 Copilot license, Teams deployment, user training",
+      subsystems: ["Microsoft 365 Copilot", "Microsoft Teams", "Azure OpenAI Service"],
     },
     {
       id: "copilot-m365-documents",
@@ -655,7 +659,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: FileText,
       benefits: "40% faster document creation, improved content quality",
-      prerequisites: "M365 Copilot license, OneDrive/SharePoint deployment",
+      criticalSystems: "M365 Copilot license, OneDrive/SharePoint deployment",
+      subsystems: ["Microsoft 365 Copilot", "SharePoint Online", "OneDrive for Business", "Azure OpenAI Service"],
     },
     {
       id: "copilot-m365-presentations",
@@ -668,7 +673,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: BarChart3,
       benefits: "50% faster presentation creation, improved visual quality",
-      prerequisites: "M365 Copilot license, PowerPoint templates, brand assets",
+      criticalSystems: "M365 Copilot license, PowerPoint templates, brand assets",
+      subsystems: ["Microsoft 365 Copilot", "PowerPoint", "Azure OpenAI Service", "Microsoft Designer"],
     },
     {
       id: "copilot-m365-teams",
@@ -681,7 +687,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: MessageSquare,
       benefits: "Improved team collaboration, faster information retrieval",
-      prerequisites: "M365 Copilot license, Teams deployment, user training",
+      criticalSystems: "M365 Copilot license, Teams deployment, user training",
+      subsystems: ["Microsoft 365 Copilot", "Microsoft Teams", "Azure OpenAI Service", "Azure AI Search"],
     },
 
     // Business Productivity Use Cases
@@ -696,7 +703,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: MessageSquare,
       benefits: "70% reduction in HR query response time, 24/7 employee support",
-      prerequisites: "HR data integration, policy documentation, compliance review",
+      criticalSystems: "HR data integration, policy documentation, compliance review",
+      subsystems: ["Microsoft Copilot Studio", "Azure OpenAI Service", "Azure AI Search", "SharePoint Online", "Microsoft Purview"],
     },
     {
       id: "ask-finance",
@@ -709,7 +717,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: MessageSquare,
       benefits: "60% reduction in finance query response time, improved compliance",
-      prerequisites: "Finance data integration, process documentation, security controls",
+      criticalSystems: "Finance data integration, process documentation, security controls",
+      subsystems: ["Microsoft 365 Copilot for Finance", "Azure OpenAI Service", "Microsoft Fabric", "Power BI", "Azure AI Search"],
     },
     {
       id: "ask-procurement",
@@ -722,7 +731,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: MessageSquare,
       benefits: "50% faster procurement process, improved vendor management",
-      prerequisites: "Procurement data integration, vendor database, process documentation",
+      criticalSystems: "Procurement data integration, vendor database, process documentation",
+      subsystems: ["Microsoft Copilot Studio", "Azure OpenAI Service", "Power Automate", "Microsoft Fabric", "Azure AI Search"],
     },
     {
       id: "ask-compliance",
@@ -735,7 +745,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: MessageSquare,
       benefits: "80% faster compliance guidance, reduced regulatory risk",
-      prerequisites: "Regulatory database, compliance documentation, security controls",
+      criticalSystems: "Regulatory database, compliance documentation, security controls",
+      subsystems: ["Azure OpenAI Service", "Azure AI Search", "Microsoft Purview", "Microsoft Fabric", "SharePoint Online"],
     },
     {
       id: "rm-assist",
@@ -748,7 +759,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: FileText,
       benefits: "75% faster document processing, improved customer service",
-      prerequisites: "Document management system, OCR capabilities, data extraction models",
+      criticalSystems: "Document management system, OCR capabilities, data extraction models",
+      subsystems: ["Azure AI Document Intelligence", "Azure OpenAI Service", "Microsoft Fabric", "Azure AI Search", "SharePoint Online"],
     },
 
     // Complex Use Cases
@@ -763,7 +775,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: Shield,
       benefits: "60% faster threat detection, improved security posture",
-      prerequisites: "Security data integration, threat intelligence feeds, SOC processes",
+      criticalSystems: "Security data integration, threat intelligence feeds, SOC processes",
+      subsystems: ["Microsoft Security Copilot", "Microsoft Sentinel", "Microsoft Defender XDR", "Azure OpenAI Service", "Microsoft Defender for Cloud"],
     },
     {
       id: "contact-center-ai",
@@ -776,7 +789,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: MessageSquare,
       benefits: "40% reduction in call volume, improved customer satisfaction",
-      prerequisites: "Customer data integration, knowledge base, conversation flows",
+      criticalSystems: "Customer data integration, knowledge base, conversation flows",
+      subsystems: ["Microsoft Copilot Studio", "Azure OpenAI Service", "Azure Communication Services", "Azure AI Search", "Azure AI Content Safety", "Microsoft Fabric"],
     },
     {
       id: "dev-copilot",
@@ -789,7 +803,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: Code,
       benefits: "30% faster development cycles, improved code quality",
-      prerequisites: "GitHub Enterprise, code repositories, developer training",
+      criticalSystems: "GitHub Enterprise, code repositories, developer training",
+      subsystems: ["GitHub Copilot", "Azure DevOps", "Azure Kubernetes Service", "Azure OpenAI Service"],
     },
     {
       id: "fwa-detection",
@@ -802,7 +817,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: Shield,
       benefits: "50% improvement in fraud detection, reduced financial losses",
-      prerequisites: "Transaction data, fraud patterns, anomaly detection models",
+      criticalSystems: "Transaction data, fraud patterns, anomaly detection models",
+      subsystems: ["Microsoft Fabric", "Azure Databricks", "Microsoft Fabric Real-Time Intelligence", "Azure OpenAI Service", "Microsoft Purview"],
     },
     {
       id: "risk-modeling",
@@ -815,7 +831,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: BarChart3,
       benefits: "40% more accurate risk predictions, improved decision-making",
-      prerequisites: "Risk data integration, historical data, model validation framework",
+      criticalSystems: "Risk data integration, historical data, model validation framework",
+      subsystems: ["Azure Databricks", "Microsoft Fabric", "Azure OpenAI Service", "Power BI", "Azure Machine Learning"],
     },
     {
       id: "loan-automation",
@@ -828,7 +845,8 @@ export function AIValueGantt() {
       status: "planned",
       icon: FileText,
       benefits: "70% faster loan processing, improved approval accuracy",
-      prerequisites: "Loan data, credit scoring models, document processing capabilities",
+      criticalSystems: "Loan data, credit scoring models, document processing capabilities",
+      subsystems: ["Azure AI Document Intelligence", "Azure OpenAI Service", "Microsoft Fabric", "Power Automate", "Azure API Management", "Microsoft Purview"],
     },
   ]
 
@@ -861,7 +879,7 @@ export function AIValueGantt() {
 
   const getPhaseColor = (phase: string, isMilestone = false, isCritical = false) => {
     if (isCritical) {
-      return "bg-[#FFECB3] border-[#FFA000] border-2"
+      return "bg-[#FEE2E2] border-[#DC2626] border-2"
     }
 
     if (isMilestone) {
@@ -873,7 +891,7 @@ export function AIValueGantt() {
         return "bg-[#E3F2FD] border-[#1565C0]"
       case "transition":
         return "bg-[#FFF9C4] border-[#FBC02D]"
-      case "maybank":
+      case "cimb":
         return "bg-[#FFF3E0] border-[#FF9800]"
       default:
         return "bg-gray-100 border-gray-400"
@@ -1001,14 +1019,14 @@ export function AIValueGantt() {
           </div>
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-[#FFF3E0] border border-[#FF9800]" />
-            <span className="text-xs">Maybank-led</span>
+            <span className="text-xs">CIMB-led</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-[#FFC107] border border-[#FFA000]" />
             <span className="text-xs">Milestone</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-[#FFECB3] border-2 border-[#FFA000]" />
+            <div className="h-3 w-3 rounded-full bg-[#FEE2E2] border-2 border-[#DC2626]" />
             <span className="text-xs">Critical Path</span>
           </div>
         </div>
@@ -1198,8 +1216,8 @@ export function AIValueGantt() {
                         })}
                       </ul>
 
-                      <h4 className="text-sm font-semibold mt-4 mb-2">Prerequisites</h4>
-                      <p className="text-sm">{useCase.prerequisites}</p>
+                      <h4 className="text-sm font-semibold mt-4 mb-2">Critical Systems</h4>
+                      <p className="text-sm">{useCase.criticalSystems}</p>
 
                       <h4 className="text-sm font-semibold mt-4 mb-2">Category</h4>
                       <Badge className={getCategoryColor(useCase.category)}>
@@ -1209,6 +1227,23 @@ export function AIValueGantt() {
                             ? "Business Productivity"
                             : "Complex / Data-Intensive"}
                       </Badge>
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-semibold">Technology Stack & Subsystems</h4>
+                      <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-semibold">
+                        {useCase.subsystems.length} systems
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2">
+                      {useCase.subsystems.map((subsystem, idx) => (
+                        <div key={idx} className="flex items-center gap-2 p-2 bg-slate-50 rounded border border-slate-200">
+                          <div className="h-2 w-2 rounded-full bg-slate-600" />
+                          <span className="text-sm font-medium">{subsystem}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </>
@@ -1275,7 +1310,7 @@ export function AIValueGantt() {
                                 </span>
                               </div>
                               {item.critical && (
-                                <Badge variant="outline" className="bg-[#FFECB3] text-[#FF6F00] border-[#FFA000]">
+                                <Badge variant="outline" className="bg-[#FEE2E2] text-[#B91C1C] border-[#DC2626]">
                                   Critical Path
                                 </Badge>
                               )}
@@ -1431,6 +1466,25 @@ export function AIValueGantt() {
                                 </div>
 
                                 <div className="mt-2">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <p className="text-xs font-medium">Subsystems:</p>
+                                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold">
+                                      {item.subsystems.length} systems
+                                    </span>
+                                  </div>
+                                  <div className="flex flex-wrap gap-1">
+                                    {item.subsystems.map((subsystem, idx) => (
+                                      <span
+                                        key={idx}
+                                        className="text-xs bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded"
+                                      >
+                                        {subsystem}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <div className="mt-2">
                                   <p className="text-xs font-medium">Key Dependencies:</p>
                                   <div className="flex flex-wrap gap-1 mt-1">
                                     {item.dependencies.map((depId) => {
@@ -1525,6 +1579,25 @@ export function AIValueGantt() {
 
                                 <div className="mt-2">
                                   <p className="text-xs text-muted-foreground line-clamp-2">{item.description}</p>
+                                </div>
+
+                                <div className="mt-2">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <p className="text-xs font-medium">Subsystems:</p>
+                                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold">
+                                      {item.subsystems.length} systems
+                                    </span>
+                                  </div>
+                                  <div className="flex flex-wrap gap-1">
+                                    {item.subsystems.map((subsystem, idx) => (
+                                      <span
+                                        key={idx}
+                                        className="text-xs bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded"
+                                      >
+                                        {subsystem}
+                                      </span>
+                                    ))}
+                                  </div>
                                 </div>
 
                                 <div className="mt-2">
@@ -1628,6 +1701,25 @@ export function AIValueGantt() {
 
                                 <div className="mt-2">
                                   <p className="text-xs text-muted-foreground line-clamp-2">{item.description}</p>
+                                </div>
+
+                                <div className="mt-2">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <p className="text-xs font-medium">Subsystems:</p>
+                                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold">
+                                      {item.subsystems.length} systems
+                                    </span>
+                                  </div>
+                                  <div className="flex flex-wrap gap-1">
+                                    {item.subsystems.map((subsystem, idx) => (
+                                      <span
+                                        key={idx}
+                                        className="text-xs bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded"
+                                      >
+                                        {subsystem}
+                                      </span>
+                                    ))}
+                                  </div>
                                 </div>
 
                                 <div className="mt-2">
@@ -1755,7 +1847,7 @@ export function AIValueGantt() {
                   <p className="text-sm text-purple-700 capitalize">{selectedWorkstream.phase}</p>
                   <p className="text-xs text-purple-600">
                     {selectedWorkstream.phase === 'microsoft' ? 'Microsoft-led' : 
-                     selectedWorkstream.phase === 'transition' ? 'Joint delivery' : 'Maybank-led'}
+                     selectedWorkstream.phase === 'transition' ? 'Joint delivery' : 'CIMB-led'}
                   </p>
                 </div>
               </div>
@@ -1851,19 +1943,19 @@ export function AIValueGantt() {
               </div>
 
               {/* Action Items */}
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-3 text-yellow-900">Executive Action Items</h3>
+              <div className="bg-red-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3 text-red-900">Executive Action Items</h3>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-yellow-600" />
+                    <div className="h-2 w-2 rounded-full bg-red-600" />
                     <p className="text-sm">Ensure resource allocation and team availability</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-yellow-600" />
+                    <div className="h-2 w-2 rounded-full bg-red-600" />
                     <p className="text-sm">Review and approve technical architecture decisions</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-yellow-600" />
+                    <div className="h-2 w-2 rounded-full bg-red-600" />
                     <p className="text-sm">Monitor progress against planned milestones</p>
                   </div>
                 </div>

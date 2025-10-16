@@ -6,6 +6,7 @@ import { SidebarNavigation } from "@/components/sidebar-navigation"
 import { AuthProvider, useAuth } from "@/lib/auth"
 import ProtectedRoute from "@/components/protected-route"
 import { usePathname } from 'next/navigation'
+import { ScenarioProvider } from "@/contexts/scenario-context"
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -30,13 +31,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>Maybank AI Value Map Dashboard</title>
-        <meta name="description" content="Track AI initiatives, dependencies, and value creation across Maybank" />
+        <title>AI First Banking - CIMB</title>
+        <meta name="description" content="Strategic AI transformation roadmap and value creation across CIMB" />
         <meta name="generator" content="v0.dev" />
       </head>
       <body>
         <AuthProvider>
-          <LayoutContent>{children}</LayoutContent>
+          <ScenarioProvider>
+            <LayoutContent>{children}</LayoutContent>
+          </ScenarioProvider>
         </AuthProvider>
       </body>
     </html>

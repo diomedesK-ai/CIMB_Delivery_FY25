@@ -1,6 +1,6 @@
-# Maybank Delivery Dashboard
+# CIMB Delivery Dashboard
 
-A comprehensive dashboard for tracking AI initiatives, dependencies, and value creation across Maybank.
+A comprehensive dashboard for tracking AI initiatives, dependencies, and value creation across CIMB.
 
 ## Features
 
