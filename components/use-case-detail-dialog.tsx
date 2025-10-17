@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // Generate intelligent descriptions for use cases
 function generateDescription(useCase: UseCaseRecord): string {
@@ -226,6 +226,23 @@ export function UseCaseDetailDialog({
   const [kpis, setKpis] = useState<string[]>(useCase?.kpis || []);
   const [products, setProducts] = useState<string[]>(useCase?.microsoftProducts || []);
 
+  // Update state when useCase changes
+  useEffect(() => {
+    if (useCase) {
+      setSelectedCluster(useCase.commercialCluster);
+      setSelectedValueSize(useCase.clusterValueSize);
+      setImplementationSize(useCase.implementationCostBucket || 'M');
+      setCostEstimation(useCase.costEstimation || 'M');
+      setDepartments(useCase.departments || []);
+      setKpis(useCase.kpis || []);
+      setProducts(useCase.microsoftProducts || []);
+      // Reset editing states
+      setEditingDepartments(false);
+      setEditingKPIs(false);
+      setEditingProducts(false);
+    }
+  }, [useCase]);
+
   if (!useCase) return null;
 
   const handleClusterChange = async (value: string) => {
@@ -283,13 +300,46 @@ export function UseCaseDetailDialog({
     setEditingProducts(false);
   };
 
+  // Check if this use case is new
+  const newUseCaseNames = new Set([
+    // Collections (8 use cases)
+    'AI Predictive Collections Segmentation',
+    'AI Collections Outreach Orchestration',
+    'AI Dynamic Payment Plan Optimizer',
+    'AI Collections Sentiment & Compliance Monitor',
+    'AI Collections Performance Analytics',
+    'AI Fraud Detection in Collections',
+    'AI Conversational Collections Assistant',
+    'AI Early Warning & Proactive Collections',
+    // Recently added Loan Operations (10 use cases)
+    'AI Alternative Credit Scoring Engine',
+    'Real-Time Loan Decision Engine',
+    'AI Loan Application Fraud Detection',
+    'Autonomous Pre-Approval & Instant Offers',
+    'AI Loan Portfolio Risk Optimizer',
+    'Personalized Loan Product Recommender',
+    'AI Dynamic Interest Rate & Pricing Engine',
+    'AI Loan Servicing & Lifecycle Automation',
+    'Cross-Sell Intelligence for Loan Products',
+    'AI Loan Assistant & Onboarding Copilot'
+  ]);
+
+  const isNew = newUseCaseNames.has(useCase.useCase);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[85vh] bg-white">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-gray-900">
-            {useCase.useCase}
-          </DialogTitle>
+          <div className="flex items-center gap-2">
+            <DialogTitle className="text-xl font-semibold text-gray-900">
+              {useCase.useCase}
+            </DialogTitle>
+            {isNew && (
+              <span className="inline-flex items-center px-3.5 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-yellow-50 to-amber-50 text-amber-800 border-2 border-amber-500 shrink-0">
+                New
+              </span>
+            )}
+          </div>
           <div className="flex gap-2 pt-2">
             <Badge variant="outline" className="text-xs border-gray-300 text-gray-600 bg-gray-50">
               {useCase.group}

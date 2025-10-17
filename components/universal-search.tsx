@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Search, X, TrendingUp, Package, Users, Layers } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,30 @@ export function UniversalSearch() {
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
   const { useCases, updateUseCase } = useMasterData();
   const router = useRouter();
+
+  // Get available clusters from master data
+  const availableClusters = useMemo(() => {
+    const clusters = new Set<string>([
+      // Default clusters
+      'Enterprise Productivity Suite',
+      'Document Intelligence Suite',
+      'Customer Experience Platform',
+      'Risk & Compliance Suite',
+      'Advanced Analytics Suite',
+      'AI Agent Suite',
+      'Business Operations Suite',
+      'Developer & Security Tools'
+    ]);
+    
+    // Add any additional clusters from actual use cases
+    useCases.forEach(uc => {
+      if (uc.commercialCluster && uc.commercialCluster.trim()) {
+        clusters.add(uc.commercialCluster);
+      }
+    });
+    
+    return Array.from(clusters).sort();
+  }, [useCases]);
 
   interface SearchResult {
     type: 'use-case' | 'category' | 'department' | 'product';
@@ -595,6 +619,7 @@ export function UniversalSearch() {
           }
         }}
         onUpdateUseCase={updateUseCase}
+        availableClusters={availableClusters}
       />
     </>
   );
