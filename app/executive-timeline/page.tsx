@@ -146,10 +146,26 @@ export default function ExecutiveTimelinePage() {
       ]
     },
     {
+      id: 'collections-recovery',
+      name: 'AI Collections & Recovery Hub',
+      priority: 'operations',
+      order: { program: 6, customerFacing: 7, operationsFacing: 2 },
+      useCases: [
+        { name: 'Predictive Segmentation', masterDataName: 'AI Predictive Collections Segmentation', program: 'AI Strategy', bankOps: ['CB', 'CB TB'], startYear: 1, endYear: 2, bgColor: 'bg-blue-100', borderColor: 'border-blue-500', textColor: 'text-blue-900' },
+        { name: 'Outreach Orchestration', masterDataName: 'AI Collections Outreach Orchestration', program: 'AI Strategy', bankOps: ['CB', 'CB TB', 'Bank Wide'], startYear: 1, endYear: 2, bgColor: 'bg-purple-100', borderColor: 'border-purple-600', textColor: 'text-purple-900' },
+        { name: 'Payment Plan Optimizer', masterDataName: 'AI Dynamic Payment Plan Optimizer', program: 'AI Strategy', bankOps: ['CB', 'CB TB'], startYear: 2, endYear: 3, bgColor: 'bg-blue-100', borderColor: 'border-blue-500', textColor: 'text-blue-900' },
+        { name: 'Sentiment & Compliance', masterDataName: 'AI Collections Sentiment & Compliance Monitor', program: 'AI Strategy', bankOps: ['CB', 'CB TB', 'Bank Wide'], startYear: 2, endYear: 3, bgColor: 'bg-purple-100', borderColor: 'border-purple-500', textColor: 'text-purple-900' },
+        { name: 'Performance Analytics', masterDataName: 'AI Collections Performance Analytics', program: 'AI Strategy', bankOps: ['CB', 'CB TB', 'Bank Wide'], startYear: 2, endYear: 4, bgColor: 'bg-blue-100', borderColor: 'border-blue-600', textColor: 'text-blue-900' },
+        { name: 'Fraud Detection', masterDataName: 'AI Fraud Detection in Collections', program: 'AI Strategy', bankOps: ['CB', 'CB TB', 'Bank Wide'], startYear: 3, endYear: 4, bgColor: 'bg-purple-100', borderColor: 'border-purple-600', textColor: 'text-purple-900' },
+        { name: 'Conversational Assistant', masterDataName: 'AI Conversational Collections Assistant', program: 'AI Strategy', bankOps: ['CB', 'CB TB'], startYear: 3, endYear: 5, bgColor: 'bg-blue-100', borderColor: 'border-blue-500', textColor: 'text-blue-900' },
+        { name: 'Early Warning System', masterDataName: 'AI Early Warning & Proactive Collections', program: 'AI Strategy', bankOps: ['CB', 'CB TB', 'WB'], startYear: 4, endYear: 5, bgColor: 'bg-purple-100', borderColor: 'border-purple-500', textColor: 'text-purple-900' }
+      ]
+    },
+    {
       id: 'risk-intelligence',
       name: 'AI Risk Intelligence',
       priority: 'operations',
-      order: { program: 6, customerFacing: 7, operationsFacing: 2 },
+      order: { program: 7, customerFacing: 8, operationsFacing: 3 },
       useCases: [
         { name: 'Network Link Analysis', masterDataName: 'Network Link Analysis', program: 'AI Strategy', bankOps: ['Bank Wide'], startYear: 1, endYear: 1, bgColor: 'bg-blue-100', borderColor: 'border-blue-500', textColor: 'text-blue-900' },
         { name: 'Early Warning', masterDataName: 'Early Warning', program: 'AI Strategy', bankOps: ['CB', 'WB'], startYear: 1, endYear: 2, bgColor: 'bg-purple-100', borderColor: 'border-purple-500', textColor: 'text-purple-900' },
@@ -164,7 +180,7 @@ export default function ExecutiveTimelinePage() {
       id: 'compliance-audit',
       name: 'AI Compliance & Audit',
       priority: 'operations',
-      order: { program: 7, customerFacing: 8, operationsFacing: 3 },
+      order: { program: 8, customerFacing: 9, operationsFacing: 4 },
       useCases: [
         { name: 'Fraud & AML Assistant', masterDataName: 'Fraud & AML Assistant (Sensa)', program: 'AI Strategy', bankOps: ['Bank Wide'], startYear: 1, endYear: 1, bgColor: 'bg-blue-100', borderColor: 'border-blue-500', textColor: 'text-blue-900' },
         { name: 'GCAD Audrey', masterDataName: 'AUDREY (Audit Risk Explorer Buddy)', program: 'AI Strategy', bankOps: ['Bank Wide'], startYear: 1, endYear: 1, bgColor: 'bg-blue-100', borderColor: 'border-blue-500', textColor: 'text-blue-900' },
@@ -179,7 +195,7 @@ export default function ExecutiveTimelinePage() {
       id: 'autonomous-finance',
       name: 'Autonomous Finance & Procurement',
       priority: 'operations',
-      order: { program: 8, customerFacing: 9, operationsFacing: 4 },
+      order: { program: 9, customerFacing: 10, operationsFacing: 5 },
       useCases: [
         { name: 'Autonomous Finance', masterDataName: 'Autonomous Finance', program: 'AI Strategy', bankOps: ['Bank Wide'], startYear: 2, endYear: 3, bgColor: 'bg-purple-100', borderColor: 'border-purple-500', textColor: 'text-purple-900' },
         { name: 'Autonomous Procurement', masterDataName: 'Autonomous Procurement', program: 'AI Strategy', bankOps: ['Bank Wide'], startYear: 2, endYear: 3, bgColor: 'bg-purple-100', borderColor: 'border-purple-500', textColor: 'text-purple-900' },
@@ -192,7 +208,7 @@ export default function ExecutiveTimelinePage() {
       id: 'everyday-productivity',
       name: 'Everyday AI Productivity',
       priority: 'hybrid',
-      order: { program: 9, customerFacing: 5, operationsFacing: 5 },
+      order: { program: 10, customerFacing: 5, operationsFacing: 6 },
       useCases: [
         { name: 'AI Foundation', masterDataName: 'AI Foundation', program: 'AI Strategy', bankOps: ['Bank Wide'], startYear: 1, endYear: 1, bgColor: 'bg-blue-100', borderColor: 'border-blue-500', textColor: 'text-blue-900' },
         { name: 'AI Control Tower', masterDataName: 'AI Control Tower', program: 'AI Strategy', bankOps: ['Bank Wide'], startYear: 1, endYear: 1, bgColor: 'bg-blue-100', borderColor: 'border-blue-500', textColor: 'text-blue-900' },
