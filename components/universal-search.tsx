@@ -34,7 +34,7 @@ export function UniversalSearch() {
   
   // Helper to check if a use case is newly added
   const isNewUseCase = (group: string): boolean => {
-    return group === 'AI Collections & Recovery Hub' || group === 'AI Intelligent Loan Operations Hub';
+    return group === 'AI Collections & Recovery Hub' || group === 'AI‑Driven Loan Operations';
   };
 
   // Keyboard shortcut (Cmd+K or Ctrl+K)
