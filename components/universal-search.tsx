@@ -25,7 +25,13 @@ export function UniversalSearch() {
     roi?: number;
     link: string;
     useCase?: UseCaseRecord;
+    isNew?: boolean;
   }
+  
+  // Helper to check if a use case is newly added
+  const isNewUseCase = (group: string): boolean => {
+    return group === 'AI Collections & Recovery Hub' || group === 'AI Intelligent Loan Operations Hub';
+  };
 
   // Keyboard shortcut (Cmd+K or Ctrl+K)
   useEffect(() => {
@@ -93,6 +99,7 @@ export function UniversalSearch() {
             roi: uc.roi,
             link: '/use-cases',
             useCase: uc,
+            isNew: isNewUseCase(uc.group),
             score: maxScore
           });
         }
@@ -119,6 +126,7 @@ export function UniversalSearch() {
             subtitle: `${categoryUseCases.length} use cases`,
             link: '/microsoft',
             category: cat,
+            isNew: isNewUseCase(cat),
             score
           });
         }
@@ -309,10 +317,15 @@ export function UniversalSearch() {
                         {getIcon(result.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <p className="text-sm font-medium text-gray-900 truncate">
                             {result.title}
                           </p>
+                          {result.isNew && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-400 text-amber-900 border border-amber-600 shrink-0">
+                              NEW
+                            </span>
+                          )}
                           {result.roi && (
                             <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-xs shrink-0">
                               {result.roi}% ROI
