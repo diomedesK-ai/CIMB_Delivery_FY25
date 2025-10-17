@@ -225,26 +225,180 @@ export default function ExecutiveTimelinePage() {
       };
     }
     
-    // CREATE default data if not found
-    const defaultData = {
-      useCase: selectedUseCaseName || '',
-      group: 'AI Strategy',
-      subCategory: 'AI Innovation',
-      departments: ['Digital Banking', 'IT'],
-      kpis: 'Time saved, Cost reduction, Customer satisfaction',
-      microsoftProducts: ['Azure OpenAI Service', 'Microsoft Copilot', 'Power Platform'],
-      roi: 350,
-      costModel: 'Hybrid' as const,
-      investment: {
-        licenseCount: 500,
-        licenseCost: 180000,
-        acrCost: 120000,
-        implementationCost: 150000,
-        totalInvestment: 450000
+    // CREATE default data based on use case name if not found
+    const getDefaultData = (useCaseName: string) => {
+      const baseDefaults = {
+        useCase: useCaseName,
+        group: 'AI Strategy',
+        subCategory: 'AI Innovation',
+        departments: ['Digital Banking', 'IT'],
+        kpis: 'Efficiency improvement, Cost reduction, Enhanced user experience',
+        microsoftProducts: ['Azure OpenAI Service', 'Microsoft Copilot', 'Power Platform'],
+        roi: 350,
+        costModel: 'Hybrid' as const,
+        description: `Advanced AI solution for ${useCaseName}. Leverages Microsoft Azure AI and Copilot technologies to drive operational efficiency and business transformation.`,
+        economicBenefit: 'Cost reduction, Time savings, Productivity gains',
+        investment: {
+          licenseCount: 500,
+          licenseCost: 180000,
+          acrCost: 120000,
+          implementationCost: 150000,
+          totalInvestment: 450000
+        }
+      };
+
+      // Customize based on specific use cases
+      if (useCaseName.toLowerCase().includes('collection') || useCaseName.toLowerCase().includes('voiceai')) {
+        return {
+          ...baseDefaults,
+          group: 'AI Loan Banking Operations',
+          subCategory: 'Collections & Recovery',
+          departments: ['Collections', 'Credit Risk', 'Operations'],
+          kpis: 'Collection rate improvement, Cost per collection, Recovery time reduction, Agent productivity',
+          microsoftProducts: ['Azure OpenAI Service', 'Azure Speech Services', 'Azure Bot Service', 'Power Virtual Agents'],
+          roi: 420,
+          description: 'AI-powered voice agent for automated collections and customer outreach. Uses natural language processing to handle routine collection calls, improve recovery rates, and reduce operational costs.',
+          economicBenefit: 'Reduced cost per collection by 40%, Improved collection rates by 25%, Freed up 60% of agent time for complex cases',
+          investment: {
+            licenseCount: 200,
+            licenseCost: 72000,
+            acrCost: 180000,
+            implementationCost: 450000,
+            totalInvestment: 702000
+          }
+        };
       }
+
+      if (useCaseName.toLowerCase().includes('idp') || useCaseName.toLowerCase().includes('document')) {
+        return {
+          ...baseDefaults,
+          group: 'AI Loan Banking Operations',
+          subCategory: 'Document Processing',
+          departments: ['Operations', 'Loan Processing', 'Compliance'],
+          kpis: 'Document processing time, Accuracy rate, Processing cost reduction, STP rate',
+          microsoftProducts: ['Azure Document Intelligence', 'Azure OpenAI Service', 'Power Automate'],
+          roi: 380,
+          description: 'Intelligent Document Processing (IDP) solution that automates document extraction, classification, and validation. Reduces manual processing time by 80% and improves accuracy.',
+          economicBenefit: 'Reduced processing time by 80%, Improved accuracy to 98%, Cost savings of $1.2M annually',
+          investment: {
+            licenseCount: 300,
+            licenseCost: 108000,
+            acrCost: 240000,
+            implementationCost: 600000,
+            totalInvestment: 948000
+          }
+        };
+      }
+
+      if (useCaseName.toLowerCase().includes('rm') || useCaseName.toLowerCase().includes('relationship manager')) {
+        return {
+          ...baseDefaults,
+          group: 'AI-Empowered Relationship Management',
+          subCategory: 'RM Productivity',
+          departments: ['Relationship Management', 'Wealth Management', 'Corporate Banking'],
+          kpis: 'RM productivity, Client engagement rate, Cross-sell ratio, Assets under management',
+          microsoftProducts: ['Microsoft Copilot for Sales', 'Azure OpenAI Service', 'Microsoft 365', 'Power BI'],
+          roi: 450,
+          description: 'AI-powered assistant for Relationship Managers providing real-time insights, meeting summaries, and next-best-action recommendations to enhance client relationships and drive revenue.',
+          economicBenefit: 'Increased RM productivity by 35%, Improved cross-sell rates by 20%, Enhanced client satisfaction scores',
+          investment: {
+            licenseCount: 800,
+            licenseCost: 288000,
+            acrCost: 150000,
+            implementationCost: 400000,
+            totalInvestment: 838000
+          }
+        };
+      }
+
+      if (useCaseName.toLowerCase().includes('contact center') || useCaseName.toLowerCase().includes('ccaas')) {
+        return {
+          ...baseDefaults,
+          group: 'AI-Operated Customer Services / Sales',
+          subCategory: 'Contact Center AI',
+          departments: ['Customer Service', 'Contact Center', 'Operations'],
+          kpis: 'Customer satisfaction (CSAT), Average handle time (AHT), First call resolution (FCR), Agent productivity',
+          microsoftProducts: ['Azure OpenAI Service', 'Azure Speech Services', 'Dynamics 365 Customer Service', 'Microsoft Copilot'],
+          roi: 480,
+          description: 'AI-powered contact center solution providing real-time agent assistance, automated routing, sentiment analysis, and intelligent call summarization to enhance customer experience and operational efficiency.',
+          economicBenefit: 'Reduced AHT by 30%, Improved CSAT by 25%, Increased FCR by 35%, Cost savings of $2.5M annually',
+          investment: {
+            licenseCount: 400,
+            licenseCost: 144000,
+            acrCost: 240000,
+            implementationCost: 650000,
+            totalInvestment: 1034000
+          }
+        };
+      }
+
+      if (useCaseName.toLowerCase().includes('copilot') || useCaseName.toLowerCase().includes('m365')) {
+        return {
+          ...baseDefaults,
+          group: 'Everyday AI Productivity',
+          subCategory: 'Productivity Enhancement',
+          departments: ['All Departments', 'IT', 'Operations'],
+          kpis: 'Employee productivity, Time savings, Document processing speed, Meeting efficiency',
+          microsoftProducts: ['Microsoft 365 Copilot', 'Copilot Studio', 'Microsoft Teams', 'SharePoint'],
+          roi: 320,
+          description: 'Enterprise-wide deployment of Microsoft 365 Copilot and Copilot Studio to enhance employee productivity across all business functions through AI-powered assistance in daily tasks.',
+          economicBenefit: 'Average 30% time savings per employee, Improved document quality, Faster decision-making, Enhanced collaboration',
+          investment: {
+            licenseCount: 2000,
+            licenseCost: 720000,
+            acrCost: 100000,
+            implementationCost: 350000,
+            totalInvestment: 1170000
+          }
+        };
+      }
+
+      if (useCaseName.toLowerCase().includes('loan') || useCaseName.toLowerCase().includes('underwriting')) {
+        return {
+          ...baseDefaults,
+          group: 'AI Loan Banking Operations',
+          subCategory: 'Loan Processing',
+          departments: ['Loan Operations', 'Credit Risk', 'Underwriting'],
+          kpis: 'Loan processing time, Approval accuracy, Cost per loan, Default rate reduction',
+          microsoftProducts: ['Azure OpenAI Service', 'Azure Machine Learning', 'Power Automate', 'Azure Document Intelligence'],
+          roi: 390,
+          description: 'AI-driven loan processing and underwriting solution that automates credit assessment, document verification, risk scoring, and approval workflows to accelerate loan decisions.',
+          economicBenefit: 'Reduced processing time from 5 days to 4 hours, Improved accuracy by 40%, Cost savings of $3.2M annually',
+          investment: {
+            licenseCount: 350,
+            licenseCost: 126000,
+            acrCost: 280000,
+            implementationCost: 700000,
+            totalInvestment: 1106000
+          }
+        };
+      }
+
+      if (useCaseName.toLowerCase().includes('branch') || useCaseName.toLowerCase().includes('transformation')) {
+        return {
+          ...baseDefaults,
+          group: 'AI-Operated Customer Services / Sales',
+          subCategory: 'Branch Innovation',
+          departments: ['Branch Operations', 'Retail Banking', 'Customer Experience'],
+          kpis: 'Customer footfall, Transaction volume, Cost per transaction, Customer satisfaction',
+          microsoftProducts: ['Azure OpenAI Service', 'Power Platform', 'Dynamics 365', 'Microsoft Teams'],
+          roi: 360,
+          description: 'Digital transformation of branch operations with AI-powered kiosks, virtual assistants, and staff augmentation tools to create a hybrid physical-digital banking experience.',
+          economicBenefit: 'Reduced operating costs by 25%, Increased transaction efficiency by 40%, Improved customer satisfaction by 30%',
+          investment: {
+            licenseCount: 600,
+            licenseCost: 216000,
+            acrCost: 180000,
+            implementationCost: 850000,
+            totalInvestment: 1246000
+          }
+        };
+      }
+
+      return baseDefaults;
     };
     
-    return defaultData;
+    return getDefaultData(selectedUseCaseName);
   }, [selectedUseCaseName, allUseCases]);
 
   // Sort functions based on view mode
@@ -627,39 +781,55 @@ export default function ExecutiveTimelinePage() {
                 {/* Key Metrics */}
                 <div className="grid grid-cols-3 gap-4">
                   <Card className="p-5 bg-green-100 border-2 border-green-200">
-                    <div className="text-3xl font-bold text-green-700">{selectedUseCaseDetails.roi}%</div>
+                    <div className="text-3xl font-bold text-green-700">{selectedUseCaseDetails.roi || 0}%</div>
                     <div className="text-sm text-green-900 mt-1 font-semibold">ROI</div>
                   </Card>
                   <Card className="p-5 bg-blue-100 border-2 border-blue-200">
-                    <div className="text-2xl font-bold text-blue-700">{formatCurrency(selectedUseCaseDetails.investment.totalInvestment)}</div>
+                    <div className="text-2xl font-bold text-blue-700">{formatCurrency(selectedUseCaseDetails.investment?.totalInvestment || 0)}</div>
                     <div className="text-sm text-blue-900 mt-1 font-semibold">Total Investment</div>
                   </Card>
                   <Card className="p-5 bg-purple-100 border-2 border-purple-200">
-                    <div className="text-xl font-bold text-purple-700">{selectedUseCaseDetails.costModel}</div>
+                    <div className="text-xl font-bold text-purple-700">{selectedUseCaseDetails.costModel || 'Hybrid'}</div>
                     <div className="text-sm text-purple-900 mt-1 font-semibold">Cost Model</div>
                   </Card>
                 </div>
 
                 {/* Details */}
                 <div className="space-y-4">
+                  {/* Description */}
+                  {selectedUseCaseDetails.description && (
+                    <Card className="p-6 border-2 bg-blue-50">
+                      <h3 className="font-bold text-lg mb-3 text-blue-900">Description</h3>
+                      <p className="text-gray-800 leading-relaxed">{selectedUseCaseDetails.description}</p>
+                    </Card>
+                  )}
+
+                  {/* Economic Benefits */}
+                  {selectedUseCaseDetails.economicBenefit && (
+                    <Card className="p-6 border-2 bg-green-50">
+                      <h3 className="font-bold text-lg mb-3 text-green-900">Economic Benefits</h3>
+                      <p className="text-gray-800 leading-relaxed">{selectedUseCaseDetails.economicBenefit}</p>
+                    </Card>
+                  )}
+
                   <Card className="p-6 border-2">
                     <h3 className="font-bold text-lg mb-3">Use Case Details</h3>
                     <div className="space-y-3 text-sm">
                       <div>
                         <span className="font-semibold text-gray-700">Category:</span>
-                        <span className="ml-2 text-gray-900">{selectedUseCaseDetails.group}</span>
+                        <span className="ml-2 text-gray-900">{selectedUseCaseDetails.group || 'N/A'}</span>
                       </div>
                       <div>
                         <span className="font-semibold text-gray-700">Sub-Category:</span>
-                        <span className="ml-2 text-gray-900">{selectedUseCaseDetails.subCategory}</span>
+                        <span className="ml-2 text-gray-900">{selectedUseCaseDetails.subCategory || 'N/A'}</span>
                       </div>
                       <div>
                         <span className="font-semibold text-gray-700">Departments:</span>
-                        <span className="ml-2 text-gray-900">{selectedUseCaseDetails.departments?.join(', ')}</span>
+                        <span className="ml-2 text-gray-900">{selectedUseCaseDetails.departments?.join(', ') || 'N/A'}</span>
                       </div>
                       <div>
                         <span className="font-semibold text-gray-700">Primary KPIs:</span>
-                        <span className="ml-2 text-gray-900">{selectedUseCaseDetails.kpis}</span>
+                        <span className="ml-2 text-gray-900">{selectedUseCaseDetails.kpis || 'N/A'}</span>
                       </div>
                     </div>
                   </Card>
@@ -668,13 +838,13 @@ export default function ExecutiveTimelinePage() {
                   <Card className="p-6 border-2">
                     <h3 className="font-bold text-lg mb-3">Investment Breakdown</h3>
                     <div className="space-y-2 text-sm">
-                      {selectedUseCaseDetails.investment.licenseCount && (
+                      {selectedUseCaseDetails.investment?.licenseCount && (
                         <div className="flex justify-between">
                           <span className="text-gray-700">Licenses ({selectedUseCaseDetails.investment.licenseCount} users):</span>
                           <span className="font-semibold">{formatCurrency(selectedUseCaseDetails.investment.licenseCost || 0)}</span>
                         </div>
                       )}
-                      {selectedUseCaseDetails.investment.acrCost && selectedUseCaseDetails.investment.acrCost > 0 && (
+                      {selectedUseCaseDetails.investment?.acrCost && selectedUseCaseDetails.investment.acrCost > 0 && (
                         <div className="flex justify-between">
                           <span className="text-gray-700">Azure Consumption:</span>
                           <span className="font-semibold">{formatCurrency(selectedUseCaseDetails.investment.acrCost)}</span>
@@ -682,11 +852,11 @@ export default function ExecutiveTimelinePage() {
                       )}
                       <div className="flex justify-between">
                         <span className="text-gray-700">Implementation Cost:</span>
-                        <span className="font-semibold">{formatCurrency(selectedUseCaseDetails.investment.implementationCost)}</span>
+                        <span className="font-semibold">{formatCurrency(selectedUseCaseDetails.investment?.implementationCost || 0)}</span>
                       </div>
                       <div className="flex justify-between pt-2 border-t-2 font-bold text-base">
                         <span>Total Investment:</span>
-                        <span className="text-blue-700">{formatCurrency(selectedUseCaseDetails.investment.totalInvestment)}</span>
+                        <span className="text-blue-700">{formatCurrency(selectedUseCaseDetails.investment?.totalInvestment || 0)}</span>
                       </div>
                     </div>
                   </Card>
