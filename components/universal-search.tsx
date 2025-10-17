@@ -10,10 +10,14 @@ import { useMasterData } from '@/hooks/use-master-data';
 import { UseCaseRecord } from '@/lib/csv-parser';
 import { useRouter } from 'next/navigation';
 
+type FilterType = 'new' | 'high-roi' | 'medium-roi' | 'low-roi' | 'category' | 'type';
+
 export function UniversalSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [allResults, setAllResults] = useState<SearchResult[]>([]); // Store unfiltered results
+  const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
   const { useCases } = useMasterData();
   const router = useRouter();
 
@@ -188,8 +192,58 @@ export function UniversalSearch() {
     foundResults.push(...productResults.slice(0, 10));
 
     // Limit total results to 50
-    setResults(foundResults.slice(0, 50));
+    setAllResults(foundResults.slice(0, 50));
   }, [useCases]);
+
+  // Apply filters to results
+  const applyFilters = useCallback(() => {
+    if (activeFilters.size === 0) {
+      setResults(allResults);
+      return;
+    }
+
+    const filtered = allResults.filter(result => {
+      // NEW filter
+      if (activeFilters.has('new') && !result.isNew) {
+        return false;
+      }
+
+      // ROI filters (only for use cases)
+      if (result.roi !== undefined) {
+        if (activeFilters.has('high-roi') && result.roi < 400) {
+          return false;
+        }
+        if (activeFilters.has('medium-roi') && (result.roi < 300 || result.roi >= 400)) {
+          return false;
+        }
+        if (activeFilters.has('low-roi') && result.roi >= 300) {
+          return false;
+        }
+      }
+
+      // Type filters
+      if (activeFilters.has('use-case') && result.type !== 'use-case') {
+        return false;
+      }
+      if (activeFilters.has('category') && result.type !== 'category') {
+        return false;
+      }
+      if (activeFilters.has('department') && result.type !== 'department') {
+        return false;
+      }
+      if (activeFilters.has('product') && result.type !== 'product') {
+        return false;
+      }
+
+      return true;
+    });
+
+    setResults(filtered);
+  }, [allResults, activeFilters]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [allResults, activeFilters, applyFilters]);
 
   useEffect(() => {
     searchUseCases(query);
@@ -199,6 +253,20 @@ export function UniversalSearch() {
     router.push(result.link);
     setOpen(false);
     setQuery('');
+  };
+
+  const toggleFilter = (filter: string) => {
+    const newFilters = new Set(activeFilters);
+    if (newFilters.has(filter)) {
+      newFilters.delete(filter);
+    } else {
+      newFilters.add(filter);
+    }
+    setActiveFilters(newFilters);
+  };
+
+  const clearFilters = () => {
+    setActiveFilters(new Set());
   };
 
   const getIcon = (type: string) => {
@@ -277,6 +345,114 @@ export function UniversalSearch() {
                   <X className="h-4 w-4 text-gray-400" />
                 </button>
               )}
+            </div>
+
+            {/* Filters */}
+            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-semibold text-gray-600 mr-2">Filters:</span>
+                
+                {/* NEW Filter */}
+                <button
+                  onClick={() => toggleFilter('new')}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                    activeFilters.has('new')
+                      ? 'bg-amber-400 text-amber-900 border-2 border-amber-600'
+                      : 'bg-white text-gray-600 border border-gray-300 hover:border-amber-400'
+                  }`}
+                >
+                  NEW
+                </button>
+
+                {/* ROI Filters */}
+                <button
+                  onClick={() => toggleFilter('high-roi')}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                    activeFilters.has('high-roi')
+                      ? 'bg-green-500 text-white border-2 border-green-600'
+                      : 'bg-white text-gray-600 border border-gray-300 hover:border-green-500'
+                  }`}
+                >
+                  High ROI (400%+)
+                </button>
+                <button
+                  onClick={() => toggleFilter('medium-roi')}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                    activeFilters.has('medium-roi')
+                      ? 'bg-blue-500 text-white border-2 border-blue-600'
+                      : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-500'
+                  }`}
+                >
+                  Medium ROI (300-399%)
+                </button>
+                <button
+                  onClick={() => toggleFilter('low-roi')}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                    activeFilters.has('low-roi')
+                      ? 'bg-gray-500 text-white border-2 border-gray-600'
+                      : 'bg-white text-gray-600 border border-gray-300 hover:border-gray-500'
+                  }`}
+                >
+                  Low ROI (&lt;300%)
+                </button>
+
+                {/* Type Filters */}
+                <div className="w-px h-6 bg-gray-300 mx-2"></div>
+                <button
+                  onClick={() => toggleFilter('use-case')}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                    activeFilters.has('use-case')
+                      ? 'bg-blue-500 text-white border-2 border-blue-600'
+                      : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-500'
+                  }`}
+                >
+                  Use Cases
+                </button>
+                <button
+                  onClick={() => toggleFilter('category')}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                    activeFilters.has('category')
+                      ? 'bg-purple-500 text-white border-2 border-purple-600'
+                      : 'bg-white text-gray-600 border border-gray-300 hover:border-purple-500'
+                  }`}
+                >
+                  Categories
+                </button>
+                <button
+                  onClick={() => toggleFilter('department')}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                    activeFilters.has('department')
+                      ? 'bg-green-500 text-white border-2 border-green-600'
+                      : 'bg-white text-gray-600 border border-gray-300 hover:border-green-500'
+                  }`}
+                >
+                  Departments
+                </button>
+                <button
+                  onClick={() => toggleFilter('product')}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                    activeFilters.has('product')
+                      ? 'bg-orange-500 text-white border-2 border-orange-600'
+                      : 'bg-white text-gray-600 border border-gray-300 hover:border-orange-500'
+                  }`}
+                >
+                  Products
+                </button>
+
+                {/* Clear Filters */}
+                {activeFilters.size > 0 && (
+                  <>
+                    <div className="w-px h-6 bg-gray-300 mx-2"></div>
+                    <button
+                      onClick={clearFilters}
+                      className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-300 hover:bg-red-100 transition-all"
+                    >
+                      <X className="h-3 w-3" />
+                      Clear All
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Results */}
@@ -361,8 +537,15 @@ export function UniversalSearch() {
                   <span>Close</span>
                 </div>
               </div>
-              <div className="text-xs text-gray-500">
-                {results.length > 0 && `${results.length} result${results.length !== 1 ? 's' : ''}`}
+              <div className="flex items-center gap-3 text-xs text-gray-500">
+                {results.length > 0 && (
+                  <span>{results.length} result{results.length !== 1 ? 's' : ''}</span>
+                )}
+                {activeFilters.size > 0 && (
+                  <span className="text-amber-600 font-semibold">
+                    ({activeFilters.size} filter{activeFilters.size !== 1 ? 's' : ''} active)
+                  </span>
+                )}
               </div>
             </div>
           </div>
