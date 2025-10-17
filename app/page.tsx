@@ -7,8 +7,8 @@ export default function HomePage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Redirect to Microsoft tab as the default page
-    router.replace("/microsoft")
+    // Redirect to Strategic Functions as the default page
+    router.replace("/functions")
   }, [router])
 
   return (

@@ -36,12 +36,12 @@ import { UniversalSearch } from "@/components/universal-search"
 
 export function SidebarNavigation({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const [activePath, setActivePath] = useState(pathname === "/" ? "/microsoft" : pathname)
+  const [activePath, setActivePath] = useState(pathname === "/" ? "/functions" : pathname)
   const { logout } = useAuth()
 
   useEffect(() => {
-    // If we're on the root path, consider Microsoft as active since it redirects there
-    setActivePath(pathname === "/" ? "/microsoft" : pathname)
+    // If we're on the root path, consider Strategic Functions as active since it redirects there
+    setActivePath(pathname === "/" ? "/functions" : pathname)
   }, [pathname])
 
   return (
@@ -69,18 +69,6 @@ export function SidebarNavigation({ children }: { children: React.ReactNode }) {
                   <Link href="/functions">
                     <Layers className="h-5 w-5" />
                     <span>Strategic Functions</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  asChild 
-                  isActive={activePath === "/microsoft"}
-                  className={activePath === "/microsoft" ? "bg-blue-100 text-blue-900 border-r-2 border-blue-500" : ""}
-                >
-                  <Link href="/microsoft">
-                    <LayoutDashboard className="h-5 w-5" />
-                    <span>AI Clusters</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

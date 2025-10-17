@@ -11,7 +11,12 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { calculateTEIROI, getDefaultROIParameters, calculateInvestment, ROIParameters } from '@/lib/roi-calculator';
 
 // Generate intelligent descriptions for use cases
 function generateDescription(useCase: UseCaseRecord): string {
@@ -225,6 +230,23 @@ export function UseCaseDetailDialog({
   const [departments, setDepartments] = useState<string[]>(useCase?.departments || []);
   const [kpis, setKpis] = useState<string[]>(useCase?.kpis || []);
   const [products, setProducts] = useState<string[]>(useCase?.microsoftProducts || []);
+  const [roi, setRoi] = useState<number>(useCase?.roi || 300);
+  const [editingROI, setEditingROI] = useState(false);
+  const [roiInputValue, setRoiInputValue] = useState<string>(useCase?.roi?.toString() || '300');
+  
+  // TEI-based ROI Calculation Parameters (initialized from use case or defaults)
+  const [roiParams, setRoiParams] = useState<ROIParameters>(
+    useCase ? getDefaultROIParameters(useCase) : {
+      productivityGain: 8.5,
+      costReduction: 10,
+      revenueIncrease: 5,
+      adoptionRate: 60,
+      usersAffected: 500,
+      avgSalary: 60000,
+      hoursPerWeek: 40,
+      weeksPerYear: 48
+    }
+  );
 
   // Update state when useCase changes
   useEffect(() => {
@@ -236,10 +258,22 @@ export function UseCaseDetailDialog({
       setDepartments(useCase.departments || []);
       setKpis(useCase.kpis || []);
       setProducts(useCase.microsoftProducts || []);
+      
+      // Get default parameters for this use case
+      const params = getDefaultROIParameters(useCase);
+      const investment = calculateInvestment(useCase, params.usersAffected);
+      const roiResult = calculateTEIROI(params, investment, useCase);
+      
+      // Use the calculated ROI (which is now conservative)
+      setRoi(roiResult.roi);
+      setRoiInputValue(roiResult.roi.toString());
+      setRoiParams(params);
+      
       // Reset editing states
       setEditingDepartments(false);
       setEditingKPIs(false);
       setEditingProducts(false);
+      setEditingROI(false);
     }
   }, [useCase]);
 
@@ -300,6 +334,34 @@ export function UseCaseDetailDialog({
     setEditingProducts(false);
   };
 
+  // Calculate current ROI using shared TEI methodology
+  const getCurrentROI = () => {
+    if (!useCase) return null;
+    const investment = calculateInvestment(useCase, roiParams.usersAffected);
+    return calculateTEIROI(roiParams, investment, useCase);
+  };
+
+  const saveROI = async () => {
+    const calculation = getCurrentROI();
+    if (!calculation) return;
+    
+    const newROI = calculation.roi;
+    
+    if (newROI > 0) {
+      setRoi(newROI);
+      if (onUpdateUseCase) {
+        // Save the new ROI to CSV
+        await onUpdateUseCase(useCase.id, { roi: newROI });
+      }
+      setEditingROI(false);
+      
+      // Close the dialog to show updated values in the card
+      if (onOpenChange) {
+        onOpenChange(false);
+      }
+    }
+  };
+
   // Check if this use case is new
   const newUseCaseNames = new Set([
     // Collections (8 use cases)
@@ -331,9 +393,9 @@ export function UseCaseDetailDialog({
       <DialogContent className="max-w-3xl max-h-[85vh] bg-white">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <DialogTitle className="text-xl font-semibold text-gray-900">
-              {useCase.useCase}
-            </DialogTitle>
+          <DialogTitle className="text-xl font-semibold text-gray-900">
+            {useCase.useCase}
+          </DialogTitle>
             {isNew && (
               <span className="inline-flex items-center px-3.5 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-yellow-50 to-amber-50 text-amber-800 border-2 border-amber-500 shrink-0">
                 New
@@ -410,6 +472,257 @@ export function UseCaseDetailDialog({
               )}
             </div>
 
+            {/* ROI % - TEI-Based Calculator */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-900">ROI % (TEI-Based)</h3>
+                {!editingROI ? (
+                  <button
+                    onClick={() => setEditingROI(true)}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    Configure
+                  </button>
+                ) : (
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 text-[10px]">
+                    Configuring
+                  </Badge>
+                )}
+              </div>
+              
+              {editingROI ? (
+                <div className="space-y-4 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  {/* ROI Summary Display */}
+                  {getCurrentROI() && (
+                    <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-3 border-2 border-purple-300">
+                      <div className="text-center">
+                        <p className="text-3xl font-bold text-purple-700">{getCurrentROI()!.roi}%</p>
+                        <p className="text-xs text-gray-600 mt-1">5-Year ROI (TEI Methodology)</p>
+                      </div>
+                      <div className="grid grid-cols-4 gap-2 mt-3 text-center text-xs">
+                        <div>
+                          <p className="font-semibold text-gray-700">${(getCurrentROI()!.annualBenefit / 1000).toFixed(0)}k</p>
+                          <p className="text-gray-500">Annual Benefit</p>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-700">${(getCurrentROI()!.fiveYearBenefit / 1000000).toFixed(1)}M</p>
+                          <p className="text-gray-500">5-Year Total</p>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-700">${(getCurrentROI()!.investment / 1000000).toFixed(1)}M</p>
+                          <p className="text-gray-500">5-Year TCO</p>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-orange-700">{getCurrentROI()!.paybackMonths}m</p>
+                          <p className="text-gray-500">Payback</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sliders for Parameters */}
+                  <div className="space-y-3">
+                    {/* Productivity Gain */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-medium text-gray-700 flex items-center gap-1">
+                          Productivity Gain
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-3 w-3 text-gray-400 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs bg-gray-900 text-white text-xs">
+                                Time saved per user as % of working hours. Forrester TEI baseline: 11.3% for M365 Copilot (5.4 hours/week saved)
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </Label>
+                        <span className="text-xs font-bold text-purple-600">{roiParams.productivityGain}%</span>
+                      </div>
+                      <Slider
+                        value={[roiParams.productivityGain]}
+                        onValueChange={([value]) => setRoiParams({ ...roiParams, productivityGain: value })}
+                        min={0}
+                        max={50}
+                        step={0.5}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Cost Reduction */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-medium text-gray-700 flex items-center gap-1">
+                          Cost Reduction
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-3 w-3 text-gray-400 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs bg-gray-900 text-white text-xs">
+                                Reduction in operational costs (support, manual processes, errors) as % of baseline operational spend (10% of salary)
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </Label>
+                        <span className="text-xs font-bold text-green-600">{roiParams.costReduction}%</span>
+                      </div>
+                      <Slider
+                        value={[roiParams.costReduction]}
+                        onValueChange={([value]) => setRoiParams({ ...roiParams, costReduction: value })}
+                        min={0}
+                        max={50}
+                        step={1}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Revenue Increase */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-medium text-gray-700 flex items-center gap-1">
+                          Revenue Increase
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-3 w-3 text-gray-400 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs bg-gray-900 text-white text-xs">
+                                Revenue opportunity from improved customer experience, faster time-to-market, or new capabilities (as % of 5% baseline revenue impact per employee)
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </Label>
+                        <span className="text-xs font-bold text-blue-600">{roiParams.revenueIncrease}%</span>
+                      </div>
+                      <Slider
+                        value={[roiParams.revenueIncrease]}
+                        onValueChange={([value]) => setRoiParams({ ...roiParams, revenueIncrease: value })}
+                        min={0}
+                        max={30}
+                        step={1}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Adoption Rate */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-medium text-gray-700 flex items-center gap-1">
+                          Adoption Rate
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-3 w-3 text-gray-400 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs bg-gray-900 text-white text-xs">
+                                Percentage of target users actively using the solution
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </Label>
+                        <span className="text-xs font-bold text-orange-600">{roiParams.adoptionRate}%</span>
+                      </div>
+                      <Slider
+                        value={[roiParams.adoptionRate]}
+                        onValueChange={([value]) => setRoiParams({ ...roiParams, adoptionRate: value })}
+                        min={0}
+                        max={100}
+                        step={5}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Users Affected */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-medium text-gray-700">Users Affected</Label>
+                        <span className="text-xs font-bold text-gray-700">{roiParams.usersAffected.toLocaleString()}</span>
+                      </div>
+                      <Slider
+                        value={[roiParams.usersAffected]}
+                        onValueChange={([value]) => setRoiParams({ ...roiParams, usersAffected: value })}
+                        min={10}
+                        max={15000}
+                        step={50}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Average Salary */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-medium text-gray-700">Avg. Salary (Annual)</Label>
+                        <span className="text-xs font-bold text-gray-700">${roiParams.avgSalary.toLocaleString()}</span>
+                      </div>
+                      <Slider
+                        value={[roiParams.avgSalary]}
+                        onValueChange={([value]) => setRoiParams({ ...roiParams, avgSalary: value })}
+                        min={30000}
+                        max={200000}
+                        step={5000}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Benefit Breakdown */}
+                  {getCurrentROI() && (
+                    <div className="bg-white rounded p-3 border border-gray-300">
+                      <p className="text-xs font-semibold text-gray-700 mb-2">Annual Benefit Breakdown:</p>
+                      <div className="space-y-1.5 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Productivity Value:</span>
+                          <span className="font-semibold text-purple-700">${(getCurrentROI()!.productivityValue / 1000).toFixed(0)}k</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Cost Savings:</span>
+                          <span className="font-semibold text-green-700">${(getCurrentROI()!.costSavingsValue / 1000).toFixed(0)}k</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Revenue Impact:</span>
+                          <span className="font-semibold text-blue-700">${(getCurrentROI()!.revenueValue / 1000).toFixed(0)}k</span>
+                        </div>
+                        <Separator className="my-1" />
+                        <div className="flex justify-between">
+                          <span className="font-semibold text-gray-900">Total Annual:</span>
+                          <span className="font-bold text-purple-700">${(getCurrentROI()!.annualBenefit / 1000).toFixed(0)}k</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      onClick={saveROI}
+                      className="flex-1 px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 font-medium"
+                    >
+                      Apply ROI ({getCurrentROI()?.roi || 0}%)
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingROI(false);
+                      }}
+                      className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-purple-50 rounded px-3 py-2 border border-purple-200">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold text-purple-700">{roi}%</span>
+                    <span className="text-xs text-purple-600">Return on Investment</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Separator className="bg-gray-200" />
+
             {/* Implementation Size */}
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-gray-900">Implementation Size</h3>
@@ -461,7 +774,7 @@ export function UseCaseDetailDialog({
             {/* Departments - Editable */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900">Departments Involved</h3>
+              <h3 className="text-sm font-semibold text-gray-900">Departments Involved</h3>
                 {!editingDepartments && (
                   <button
                     onClick={() => setEditingDepartments(true)}
@@ -498,14 +811,14 @@ export function UseCaseDetailDialog({
                   </div>
                 </div>
               ) : (
-                <div className="pl-4 space-y-1.5">
+              <div className="pl-4 space-y-1.5">
                   {departments.map((dept, idx) => (
-                    <div key={idx} className="flex items-start">
-                      <span className="text-gray-400 mr-2 text-xs">•</span>
-                      <span className="text-sm text-gray-700">{dept}</span>
-                    </div>
-                  ))}
-                </div>
+                  <div key={idx} className="flex items-start">
+                    <span className="text-gray-400 mr-2 text-xs">•</span>
+                    <span className="text-sm text-gray-700">{dept}</span>
+                  </div>
+                ))}
+              </div>
               )}
             </div>
 
@@ -514,7 +827,7 @@ export function UseCaseDetailDialog({
             {/* KPIs - Editable */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900">Primary KPIs</h3>
+              <h3 className="text-sm font-semibold text-gray-900">Primary KPIs</h3>
                 {!editingKPIs && (
                   <button
                     onClick={() => setEditingKPIs(true)}
@@ -551,14 +864,14 @@ export function UseCaseDetailDialog({
                   </div>
                 </div>
               ) : (
-                <div className="pl-4 space-y-1.5">
+              <div className="pl-4 space-y-1.5">
                   {kpis.map((kpi, idx) => (
-                    <div key={idx} className="flex items-start">
-                      <span className="text-gray-400 mr-2 text-xs">•</span>
-                      <span className="text-sm text-gray-700">{kpi}</span>
-                    </div>
-                  ))}
-                </div>
+                  <div key={idx} className="flex items-start">
+                    <span className="text-gray-400 mr-2 text-xs">•</span>
+                    <span className="text-sm text-gray-700">{kpi}</span>
+                  </div>
+                ))}
+              </div>
               )}
             </div>
 
@@ -567,7 +880,7 @@ export function UseCaseDetailDialog({
             {/* Microsoft Products - Editable */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900">Microsoft & Partner Products</h3>
+              <h3 className="text-sm font-semibold text-gray-900">Microsoft & Partner Products</h3>
                 {!editingProducts && (
                   <button
                     onClick={() => setEditingProducts(true)}
@@ -604,14 +917,14 @@ export function UseCaseDetailDialog({
                   </div>
                 </div>
               ) : (
-                <div className="pl-4 space-y-1.5">
+              <div className="pl-4 space-y-1.5">
                   {products.map((product, idx) => (
-                    <div key={idx} className="flex items-start">
-                      <span className="text-gray-400 mr-2 text-xs">•</span>
-                      <span className="text-sm text-gray-700">{product}</span>
-                    </div>
-                  ))}
-                </div>
+                  <div key={idx} className="flex items-start">
+                    <span className="text-gray-400 mr-2 text-xs">•</span>
+                    <span className="text-sm text-gray-700">{product}</span>
+                  </div>
+                ))}
+              </div>
               )}
             </div>
 

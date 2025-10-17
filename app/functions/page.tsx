@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ import { useMasterData } from '@/hooks/use-master-data';
 import { UseCaseRecord, calculateUseCaseInvestment, getImplementationCostBucket } from '@/lib/csv-parser';
 import { useScenario } from '@/contexts/scenario-context';
 import { ScenarioToggle } from '@/components/scenario-toggle';
+import { UseCaseDetailDialog } from '@/components/use-case-detail-dialog';
+import { calculateUseCaseROI } from '@/lib/roi-calculator';
 
 interface FunctionGroup {
   id: number;
@@ -50,10 +52,85 @@ const newUseCaseNames = new Set([
 ]);
 
 export default function FunctionsPage() {
-  const { useCases, loading } = useMasterData();
+  const { useCases, loading, updateUseCase } = useMasterData();
   const { getAdjustedROI, scenarioLabel } = useScenario();
   const [functions, setFunctions] = useState<FunctionGroup[]>([]);
   const [selectedFunction, setSelectedFunction] = useState<FunctionGroup | null>(null);
+  const [selectedUseCase, setSelectedUseCase] = useState<UseCaseRecord | null>(null);
+  const [useCaseDialogOpen, setUseCaseDialogOpen] = useState(false);
+  const [editingFunctionROI, setEditingFunctionROI] = useState(false);
+  const [functionROIInput, setFunctionROIInput] = useState<string>('');
+  const [manualROIOverrides, setManualROIOverrides] = useState<{ [functionName: string]: number }>({});
+
+  // Get available clusters from master data
+  const availableClusters = useMemo(() => {
+    const clusters = new Set<string>([
+      'Enterprise Productivity Suite',
+      'Document Intelligence Suite',
+      'Customer Experience Platform',
+      'Risk & Compliance Suite',
+      'Advanced Analytics Suite',
+      'AI Agent Suite',
+      'Business Operations Suite',
+      'Developer & Security Tools'
+    ]);
+    
+    useCases.forEach(uc => {
+      if (uc.commercialCluster && uc.commercialCluster.trim()) {
+        clusters.add(uc.commercialCluster);
+      }
+    });
+    
+    return Array.from(clusters).sort();
+  }, [useCases]);
+
+  const handleUseCaseClick = (uc: UseCaseRecord) => {
+    setSelectedUseCase(uc);
+    setUseCaseDialogOpen(true);
+  };
+
+  const handleEditFunctionROI = () => {
+    if (selectedFunction) {
+      setFunctionROIInput(selectedFunction.weightedROI.toString());
+      setEditingFunctionROI(true);
+    }
+  };
+
+  const saveFunctionROI = async () => {
+    const newROI = parseInt(functionROIInput);
+    if (!isNaN(newROI) && newROI > 0 && selectedFunction) {
+      // Store the override
+      setManualROIOverrides(prev => ({
+        ...prev,
+        [selectedFunction.name]: newROI
+      }));
+      
+      // Calculate the scaling factor
+      const currentROI = selectedFunction.weightedROI;
+      const scalingFactor = newROI / currentROI;
+      
+      // Propagate to all use cases in this function
+      const updatePromises = selectedFunction.useCases.map(async (uc) => {
+        const currentUseCaseROI = uc.roi || 300;
+        const newUseCaseROI = Math.round(currentUseCaseROI * scalingFactor);
+        if (updateUseCase) {
+          await updateUseCase(uc.id, { roi: newUseCaseROI });
+        }
+      });
+      
+      await Promise.all(updatePromises);
+      setEditingFunctionROI(false);
+      
+      // Force re-calculation by triggering useEffect
+      setSelectedFunction(null);
+      setTimeout(() => {
+        const updatedFunction = functions.find(f => f.name === selectedFunction.name);
+        if (updatedFunction) {
+          setSelectedFunction(updatedFunction);
+        }
+      }, 100);
+    }
+  };
 
   useEffect(() => {
     if (useCases.length > 0) {
@@ -137,32 +214,32 @@ export default function FunctionsPage() {
         return acc;
       }, {} as { [key: string]: FunctionGroup });
 
-      // Calculate aggregated metrics
+      // Calculate aggregated metrics using TEI methodology
       const functionsArray = Object.values(grouped).map(func => {
         let totalInvestment = 0;
-        let totalReturn = 0;
+        let totalBenefit = 0;
         let totalImplementationCost = 0;
 
         func.useCases.forEach(uc => {
-          const investment = calculateUseCaseInvestment(uc);
+          // Use TEI calculator for accurate ROI
+          const roiResult = calculateUseCaseROI(uc);
           const implBucket = getImplementationCostBucket(uc);
-          const baseROI = uc.roi || 300;
-          const adjustedROI = getAdjustedROI(baseROI);
-          const returnValue = investment * (adjustedROI / 100);
 
-          totalInvestment += investment;
-          totalReturn += returnValue;
+          totalInvestment += roiResult.investment;
+          totalBenefit += roiResult.fiveYearBenefit;
           totalImplementationCost += implBucket.cost;
         });
 
-        const weightedROI = totalInvestment > 0 ? ((totalReturn / totalInvestment) - 1) * 100 : 0;
-        const totalValue = totalReturn - totalInvestment;
+        // Weighted ROI: (Total Net Benefit / Total Investment) * 100
+        const totalNetBenefit = totalBenefit - totalInvestment;
+        const weightedROI = totalInvestment > 0 ? (totalNetBenefit / totalInvestment) * 100 : 0;
+        const totalValue = totalNetBenefit;
 
         return {
           ...func,
           weightedROI,
           totalInvestment,
-          totalReturn,
+          totalReturn: totalBenefit,
           totalValue,
           totalImplementationCost,
           useCaseCount: func.useCases.length
@@ -311,7 +388,13 @@ export default function FunctionsPage() {
 
       {/* Detail Dialog */}
       {selectedFunction && (
-        <Dialog open={!!selectedFunction} onOpenChange={(open) => !open && setSelectedFunction(null)}>
+        <Dialog open={!!selectedFunction} onOpenChange={(open) => {
+          if (!open) {
+            setSelectedFunction(null);
+            setEditingFunctionROI(false);
+            setFunctionROIInput('');
+          }
+        }}>
           <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto bg-white">
             <DialogHeader>
               <div className="flex items-center gap-3">
@@ -329,13 +412,58 @@ export default function FunctionsPage() {
               {/* Aggregated Metrics */}
               <Card className="bg-purple-50 border-purple-200">
                 <CardHeader>
-                  <CardTitle className="text-lg">Aggregated Function Metrics</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">Aggregated Function Metrics</CardTitle>
+                    {manualROIOverrides[selectedFunction.name] && (
+                      <Badge variant="outline" className="bg-yellow-50 text-yellow-800 border-yellow-400">
+                        Manually Adjusted
+                      </Badge>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-purple-700">{Math.round(selectedFunction.weightedROI)}%</p>
-                      <p className="text-sm text-gray-600 mt-1">Weighted ROI</p>
+                      {editingFunctionROI ? (
+                        <div className="space-y-2">
+                          <input
+                            type="number"
+                            value={functionROIInput}
+                            onChange={(e) => setFunctionROIInput(e.target.value)}
+                            className="w-20 p-1 text-center text-xl font-bold border border-purple-300 rounded"
+                            min="0"
+                          />
+                          <p className="text-xs text-gray-600">%</p>
+                          <div className="flex gap-1 justify-center">
+                            <button
+                              onClick={saveFunctionROI}
+                              className="px-2 py-0.5 text-[10px] bg-green-600 text-white rounded hover:bg-green-700"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => {
+                                setFunctionROIInput('');
+                                setEditingFunctionROI(false);
+                              }}
+                              className="px-2 py-0.5 text-[10px] bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="text-3xl font-bold text-purple-700">{Math.round(selectedFunction.weightedROI)}%</p>
+                          <p className="text-sm text-gray-600 mt-1">Weighted ROI</p>
+                          <button
+                            onClick={handleEditFunctionROI}
+                            className="text-xs text-blue-600 hover:text-blue-800 font-medium mt-1"
+                          >
+                            Edit
+                          </button>
+                        </>
+                      )}
                     </div>
                     <div className="text-center">
                       <p className="text-2xl font-bold text-gray-900">{formatCurrency(selectedFunction.totalInvestment)}</p>
@@ -388,14 +516,18 @@ export default function FunctionsPage() {
                 </h3>
                 <div className="space-y-3">
                   {selectedFunction.useCases.map((uc, idx) => {
-                    const investment = calculateUseCaseInvestment(uc);
-                    const baseROI = uc.roi || 300;
-                    const roi = getAdjustedROI(baseROI);
-                    const returnValue = investment * (roi / 100);
-                    const netValue = returnValue - investment;
+                    // Calculate ROI dynamically using TEI methodology
+                    const roiResult = calculateUseCaseROI(uc);
+                    const roi = getAdjustedROI(roiResult.roi);
+                    const investment = roiResult.investment;
+                    const netValue = investment * (roi / 100);
 
                     return (
-                      <Card key={idx} className="border border-gray-200 hover:border-blue-400 transition-all">
+                      <Card 
+                        key={idx} 
+                        className="border border-gray-200 hover:border-blue-400 transition-all cursor-pointer"
+                        onClick={() => handleUseCaseClick(uc)}
+                      >
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -448,6 +580,20 @@ export default function FunctionsPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Use Case Detail Dialog */}
+      <UseCaseDetailDialog
+        useCase={selectedUseCase}
+        open={useCaseDialogOpen}
+        onOpenChange={(isOpen) => {
+          setUseCaseDialogOpen(isOpen);
+          if (!isOpen) {
+            setSelectedUseCase(null);
+          }
+        }}
+        onUpdateUseCase={updateUseCase}
+        availableClusters={availableClusters}
+      />
     </div>
   );
 }
