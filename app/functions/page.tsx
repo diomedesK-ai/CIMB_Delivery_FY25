@@ -25,6 +25,30 @@ interface FunctionGroup {
   useCaseCount: number;
 }
 
+// NEW use cases: All Collections + 10 recently added Loan Operations
+const newUseCaseNames = new Set([
+  // Collections (8 use cases)
+  'AI Predictive Collections Segmentation',
+  'AI Collections Outreach Orchestration',
+  'AI Dynamic Payment Plan Optimizer',
+  'AI Collections Sentiment & Compliance Monitor',
+  'AI Collections Performance Analytics',
+  'AI Fraud Detection in Collections',
+  'AI Conversational Collections Assistant',
+  'AI Early Warning & Proactive Collections',
+  // Recently added Loan Operations (10 use cases)
+  'AI Alternative Credit Scoring Engine',
+  'Real-Time Loan Decision Engine',
+  'AI Loan Application Fraud Detection',
+  'Autonomous Pre-Approval & Instant Offers',
+  'AI Loan Portfolio Risk Optimizer',
+  'Personalized Loan Product Recommender',
+  'AI Dynamic Interest Rate & Pricing Engine',
+  'AI Loan Servicing & Lifecycle Automation',
+  'Cross-Sell Intelligence for Loan Products',
+  'AI Loan Assistant & Onboarding Copilot'
+]);
+
 export default function FunctionsPage() {
   const { useCases, loading } = useMasterData();
   const { getAdjustedROI, scenarioLabel } = useScenario();
@@ -375,7 +399,14 @@ export default function FunctionsPage() {
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900">{uc.useCase}</h4>
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-semibold text-gray-900">{uc.useCase}</h4>
+                                {newUseCaseNames.has(uc.useCase) && (
+                                  <span className="inline-flex items-center px-3.5 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-yellow-50 to-amber-50 text-amber-800 border-2 border-amber-500 shrink-0">
+                                    New
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-sm text-gray-600 mt-1">{uc.subCategory}</p>
                               <div className="flex flex-wrap gap-2 mt-2">
                                 {uc.departments.slice(0, 3).map((dept, i) => (
