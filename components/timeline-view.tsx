@@ -94,7 +94,7 @@ export function TimelineView() {
                                   {useCase.useCase}
                                 </CardTitle>
                                 {newUseCaseNames.has(useCase.useCase) && (
-                                  <span className="inline-flex items-center px-3 py-0.5 rounded-md text-[9px] font-bold bg-gradient-to-r from-yellow-50 to-amber-50 text-amber-800 border-2 border-amber-500 shrink-0 ml-1">
+                                  <span className="inline-flex items-center px-3.5 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-yellow-50 to-amber-50 text-amber-800 border border-amber-500 shrink-0 ml-1">
                                     New
                                   </span>
                                 )}

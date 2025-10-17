@@ -19,6 +19,8 @@ export interface UseCaseRecord {
   licenseCostPerUser?: number; // Cost per user per month (USD)
   acrMonthlySpend?: number; // Azure Consumption monthly spend (USD)
   implementationCost?: number; // One-time implementation cost (USD)
+  implementationCostBucket?: string; // S (<100K), M (100K-1M), L (1M-3M)
+  costEstimation?: string; // 5-year TCO: S ($1M-$5M), M ($5M-$15M), L ($15M-$50M)
   status?: string;
   priority?: string;
   startDate?: string;

@@ -19,7 +19,7 @@ export function UniversalSearch() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [allResults, setAllResults] = useState<SearchResult[]>([]); // Store unfiltered results
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
-  const { useCases } = useMasterData();
+  const { useCases, updateUseCase } = useMasterData();
   const router = useRouter();
 
   interface SearchResult {
@@ -388,7 +388,7 @@ export function UniversalSearch() {
                 {/* New Filter */}
                 <button
                   onClick={() => toggleFilter('new')}
-                  className={`inline-flex items-center px-4 py-1 rounded-md text-xs font-semibold transition-all ${
+                  className={`inline-flex items-center px-4 py-1 rounded-full text-xs font-semibold transition-all ${
                     activeFilters.has('new')
                       ? 'bg-gradient-to-r from-yellow-50 to-amber-50 text-amber-800 border-2 border-amber-500'
                       : 'bg-white text-gray-600 border border-gray-300 hover:border-amber-400'
@@ -531,7 +531,7 @@ export function UniversalSearch() {
                             {result.title}
                           </p>
                           {result.isNew && (
-                            <span className="inline-flex items-center px-3 py-0.5 rounded-md text-[10px] font-bold bg-gradient-to-r from-yellow-50 to-amber-50 text-amber-800 border-2 border-amber-500 shrink-0">
+                            <span className="inline-flex items-center px-3.5 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-yellow-50 to-amber-50 text-amber-800 border-2 border-amber-500 shrink-0">
                               New
                             </span>
                           )}
@@ -594,6 +594,7 @@ export function UniversalSearch() {
             setSelectedUseCaseForDialog(null);
           }
         }}
+        onUpdateUseCase={updateUseCase}
       />
     </>
   );

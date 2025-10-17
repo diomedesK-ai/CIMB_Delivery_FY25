@@ -202,6 +202,7 @@ interface UseCaseDetailDialogProps {
   onOpenChange: (open: boolean) => void;
   onUpdateCluster?: (useCaseId: string, cluster: string) => void;
   onUpdateValueSize?: (useCaseId: string, valueSize: 'Small' | 'Medium' | 'Large') => void;
+  onUpdateUseCase?: (useCaseId: string, updates: Partial<UseCaseRecord>) => Promise<void>;
   availableClusters?: string[];
 }
 
@@ -211,25 +212,75 @@ export function UseCaseDetailDialog({
   onOpenChange,
   onUpdateCluster,
   onUpdateValueSize,
+  onUpdateUseCase,
   availableClusters = []
 }: UseCaseDetailDialogProps) {
   const [selectedCluster, setSelectedCluster] = useState<string | undefined>(useCase?.commercialCluster);
   const [selectedValueSize, setSelectedValueSize] = useState<string | undefined>(useCase?.clusterValueSize);
+  const [implementationSize, setImplementationSize] = useState<string>(useCase?.implementationCostBucket || 'M');
+  const [costEstimation, setCostEstimation] = useState<string>(useCase?.costEstimation || 'M');
+  const [editingDepartments, setEditingDepartments] = useState(false);
+  const [editingKPIs, setEditingKPIs] = useState(false);
+  const [editingProducts, setEditingProducts] = useState(false);
+  const [departments, setDepartments] = useState<string[]>(useCase?.departments || []);
+  const [kpis, setKpis] = useState<string[]>(useCase?.kpis || []);
+  const [products, setProducts] = useState<string[]>(useCase?.microsoftProducts || []);
 
   if (!useCase) return null;
 
-  const handleClusterChange = (value: string) => {
+  const handleClusterChange = async (value: string) => {
     setSelectedCluster(value);
     if (onUpdateCluster) {
       onUpdateCluster(useCase.id, value);
     }
+    if (onUpdateUseCase) {
+      await onUpdateUseCase(useCase.id, { commercialCluster: value === 'unassigned' ? undefined : value });
+    }
   };
 
-  const handleValueSizeChange = (value: string) => {
+  const handleValueSizeChange = async (value: string) => {
     setSelectedValueSize(value);
     if (onUpdateValueSize && (value === 'Small' || value === 'Medium' || value === 'Large')) {
       onUpdateValueSize(useCase.id, value);
     }
+    if (onUpdateUseCase) {
+      await onUpdateUseCase(useCase.id, { clusterValueSize: value as 'Small' | 'Medium' | 'Large' });
+    }
+  };
+
+  const handleImplementationSizeChange = async (value: string) => {
+    setImplementationSize(value);
+    if (onUpdateUseCase) {
+      await onUpdateUseCase(useCase.id, { implementationCostBucket: value });
+    }
+  };
+
+  const handleCostEstimationChange = async (value: string) => {
+    setCostEstimation(value);
+    if (onUpdateUseCase) {
+      await onUpdateUseCase(useCase.id, { costEstimation: value });
+    }
+  };
+
+  const saveDepartments = async () => {
+    if (onUpdateUseCase) {
+      await onUpdateUseCase(useCase.id, { departments });
+    }
+    setEditingDepartments(false);
+  };
+
+  const saveKPIs = async () => {
+    if (onUpdateUseCase) {
+      await onUpdateUseCase(useCase.id, { kpis });
+    }
+    setEditingKPIs(false);
+  };
+
+  const saveProducts = async () => {
+    if (onUpdateUseCase) {
+      await onUpdateUseCase(useCase.id, { microsoftProducts: products });
+    }
+    setEditingProducts(false);
   };
 
   return (
@@ -309,49 +360,209 @@ export function UseCaseDetailDialog({
               )}
             </div>
 
-            <Separator className="bg-gray-200" />
-
-            {/* Departments */}
+            {/* Implementation Size */}
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-gray-900">Departments Involved</h3>
-              <div className="pl-4 space-y-1.5">
-                {useCase.departments.map((dept, idx) => (
-                  <div key={idx} className="flex items-start">
-                    <span className="text-gray-400 mr-2 text-xs">•</span>
-                    <span className="text-sm text-gray-700">{dept}</span>
-                  </div>
-                ))}
-              </div>
+              <h3 className="text-sm font-semibold text-gray-900">Implementation Size</h3>
+              <Select 
+                value={implementationSize} 
+                onValueChange={handleImplementationSizeChange}
+              >
+                <SelectTrigger className="w-full border-gray-200">
+                  <SelectValue placeholder="Select implementation size..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="S">Small (&lt;$100K)</SelectItem>
+                  <SelectItem value="M">Medium ($100K-$1M)</SelectItem>
+                  <SelectItem value="L">Large ($1M-$3M)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500">
+                {implementationSize === 'S' && 'Low complexity: <$100K implementation cost'}
+                {implementationSize === 'M' && 'Medium complexity: $100K-$1M implementation cost'}
+                {implementationSize === 'L' && 'High complexity: $1M-$3M implementation cost'}
+              </p>
+            </div>
+
+            {/* Cost Estimation (5 Years) */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-gray-900">Cost Estimation (5 Years TCO)</h3>
+              <Select 
+                value={costEstimation} 
+                onValueChange={handleCostEstimationChange}
+              >
+                <SelectTrigger className="w-full border-gray-200">
+                  <SelectValue placeholder="Select cost estimation..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="S">Small ($1M-$5M)</SelectItem>
+                  <SelectItem value="M">Medium ($5M-$15M)</SelectItem>
+                  <SelectItem value="L">Large ($15M-$50M)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500">
+                {costEstimation === 'S' && 'Total Cost of Ownership over 5 years: $1M-$5M'}
+                {costEstimation === 'M' && 'Total Cost of Ownership over 5 years: $5M-$15M'}
+                {costEstimation === 'L' && 'Total Cost of Ownership over 5 years: $15M-$50M'}
+              </p>
             </div>
 
             <Separator className="bg-gray-200" />
 
-            {/* KPIs */}
+            {/* Departments - Editable */}
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-gray-900">Primary KPIs</h3>
-              <div className="pl-4 space-y-1.5">
-                {useCase.kpis.map((kpi, idx) => (
-                  <div key={idx} className="flex items-start">
-                    <span className="text-gray-400 mr-2 text-xs">•</span>
-                    <span className="text-sm text-gray-700">{kpi}</span>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-900">Departments Involved</h3>
+                {!editingDepartments && (
+                  <button
+                    onClick={() => setEditingDepartments(true)}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    Edit
+                  </button>
+                )}
               </div>
+              {editingDepartments ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={departments.join('\n')}
+                    onChange={(e) => setDepartments(e.target.value.split('\n').filter(d => d.trim()))}
+                    className="w-full min-h-[100px] p-2 text-sm border border-gray-300 rounded"
+                    placeholder="Enter departments (one per line)"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={saveDepartments}
+                      className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => {
+                        setDepartments(useCase.departments);
+                        setEditingDepartments(false);
+                      }}
+                      className="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="pl-4 space-y-1.5">
+                  {departments.map((dept, idx) => (
+                    <div key={idx} className="flex items-start">
+                      <span className="text-gray-400 mr-2 text-xs">•</span>
+                      <span className="text-sm text-gray-700">{dept}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <Separator className="bg-gray-200" />
 
-            {/* Microsoft Products */}
+            {/* KPIs - Editable */}
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-gray-900">Microsoft & Partner Products</h3>
-              <div className="pl-4 space-y-1.5">
-                {useCase.microsoftProducts.map((product, idx) => (
-                  <div key={idx} className="flex items-start">
-                    <span className="text-gray-400 mr-2 text-xs">•</span>
-                    <span className="text-sm text-gray-700">{product}</span>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-900">Primary KPIs</h3>
+                {!editingKPIs && (
+                  <button
+                    onClick={() => setEditingKPIs(true)}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    Edit
+                  </button>
+                )}
               </div>
+              {editingKPIs ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={kpis.join('\n')}
+                    onChange={(e) => setKpis(e.target.value.split('\n').filter(k => k.trim()))}
+                    className="w-full min-h-[100px] p-2 text-sm border border-gray-300 rounded"
+                    placeholder="Enter KPIs (one per line)"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={saveKPIs}
+                      className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => {
+                        setKpis(useCase.kpis);
+                        setEditingKPIs(false);
+                      }}
+                      className="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="pl-4 space-y-1.5">
+                  {kpis.map((kpi, idx) => (
+                    <div key={idx} className="flex items-start">
+                      <span className="text-gray-400 mr-2 text-xs">•</span>
+                      <span className="text-sm text-gray-700">{kpi}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Separator className="bg-gray-200" />
+
+            {/* Microsoft Products - Editable */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-900">Microsoft & Partner Products</h3>
+                {!editingProducts && (
+                  <button
+                    onClick={() => setEditingProducts(true)}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
+              {editingProducts ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={products.join('\n')}
+                    onChange={(e) => setProducts(e.target.value.split('\n').filter(p => p.trim()))}
+                    className="w-full min-h-[120px] p-2 text-sm border border-gray-300 rounded"
+                    placeholder="Enter products (one per line)"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={saveProducts}
+                      className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => {
+                        setProducts(useCase.microsoftProducts);
+                        setEditingProducts(false);
+                      }}
+                      className="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="pl-4 space-y-1.5">
+                  {products.map((product, idx) => (
+                    <div key={idx} className="flex items-start">
+                      <span className="text-gray-400 mr-2 text-xs">•</span>
+                      <span className="text-sm text-gray-700">{product}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Prerequisites */}
