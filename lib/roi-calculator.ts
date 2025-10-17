@@ -103,8 +103,8 @@ export function calculateTEIROI(params: ROIParameters, investment: number, useCa
   
   return {
     roi: Math.round(roi),
-    annualBenefit: threeYearBenefit / 3,  // Average annual over 3 years
-    fiveYearBenefit: threeYearBenefit,    // Actually 3-year, but keeping interface name for compatibility
+    annualBenefit: riskAdjustedBenefit / 3,  // Average annual over 3 years (risk-adjusted)
+    fiveYearBenefit: riskAdjustedBenefit,    // 3-year RISK-ADJUSTED benefit for proper weighted ROI
     investment: threeYearInvestment,
     netBenefit,
     productivityValue,
