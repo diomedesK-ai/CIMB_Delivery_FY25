@@ -42,122 +42,122 @@ export interface TEIFormula {
 
 // TEI Formula Library - Each formula calibrated for specific use case types
 export const TEI_FORMULAS: { [key: string]: TEIFormula } = {
-  // M365 Copilot / Productivity Tools (Forrester TEI: 140% 3-year ROI)
+  // M365 Copilot / Productivity Tools (Target: 190% 3-year ROI)
   PRODUCTIVITY_COPILOT: {
     name: 'M365 Copilot Productivity',
     description: 'Knowledge worker productivity with AI copilots',
     productivityWeight: 0.70,  // Primary driver
     costAvoidanceWeight: 0.20,
     revenueWeight: 0.10,
-    baseProductivity: 5.2,     // Calibrated for ~140% ROI (Forrester actual)
-    baseCostAvoidance: 3.5,
-    baseRevenueImpact: 1.5,
-    baseAdoption: 60,          // Forrester: ramps to 60% by Year 3
+    baseProductivity: 6.5,     // Calibrated for consistent ~190% ROI
+    baseCostAvoidance: 4.5,
+    baseRevenueImpact: 2.2,
+    baseAdoption: 62,
     licenseMultiplier: 1.0,
     servicesMultiplier: 0.8
   },
   
-  // Customer Service / Contact Center (Target: ~180% 3-year ROI)
+  // Customer Service / Contact Center (Target: ~200% 3-year ROI)
   CUSTOMER_SERVICE_AI: {
     name: 'AI Contact Center',
     description: 'Automated customer service and support',
     productivityWeight: 0.30,
     costAvoidanceWeight: 0.50,  // Primary driver
     revenueWeight: 0.20,
-    baseProductivity: 3.5,      // Calibrated for ~180% ROI
-    baseCostAvoidance: 8.5,     // Call deflection value
-    baseRevenueImpact: 4.0,
+    baseProductivity: 5.0,      // Calibrated for ~200% ROI
+    baseCostAvoidance: 10.5,    // Call deflection value
+    baseRevenueImpact: 5.0,
     baseAdoption: 65,
     licenseMultiplier: 1.1,
     servicesMultiplier: 1.2
   },
   
-  // Document Intelligence / IDP (Target: ~200% 3-year ROI)
+  // Document Intelligence / IDP (Target: ~210% 3-year ROI)
   DOCUMENT_INTELLIGENCE: {
     name: 'Document Intelligence',
     description: 'Automated document processing and extraction',
     productivityWeight: 0.50,
     costAvoidanceWeight: 0.40,
     revenueWeight: 0.10,
-    baseProductivity: 6.5,      // Calibrated for ~200% ROI
-    baseCostAvoidance: 6.5,
-    baseRevenueImpact: 2.0,
-    baseAdoption: 55,
+    baseProductivity: 7.5,      // Calibrated for ~210% ROI
+    baseCostAvoidance: 7.5,
+    baseRevenueImpact: 2.8,
+    baseAdoption: 60,
     licenseMultiplier: 0.9,
     servicesMultiplier: 1.1
   },
   
-  // Risk & Compliance (Target: ~200% 3-year ROI)
+  // Risk & Compliance (Target: ~215% 3-year ROI)
   RISK_COMPLIANCE: {
     name: 'Risk & Compliance AI',
     description: 'Automated risk detection and compliance monitoring',
     productivityWeight: 0.25,
     costAvoidanceWeight: 0.65,
     revenueWeight: 0.10,
-    baseProductivity: 5.5,      // Calibrated for ~200% ROI
-    baseCostAvoidance: 12.0,    // High value from avoided penalties
-    baseRevenueImpact: 2.5,
-    baseAdoption: 60,
+    baseProductivity: 6.5,      // Calibrated for ~215% ROI
+    baseCostAvoidance: 13.5,    // High value from avoided penalties
+    baseRevenueImpact: 3.2,
+    baseAdoption: 63,
     licenseMultiplier: 1.0,
     servicesMultiplier: 1.2
   },
   
-  // Sales & RM Tools (Target: ~170% 3-year ROI)
+  // Sales & RM Tools (Target: ~195% 3-year ROI)
   SALES_ENABLEMENT: {
     name: 'Sales & RM AI',
     description: 'AI-powered sales tools and relationship management',
     productivityWeight: 0.30,
     costAvoidanceWeight: 0.20,
     revenueWeight: 0.50,        // Primary driver
-    baseProductivity: 4.5,      // Calibrated for ~170% ROI
-    baseCostAvoidance: 3.5,
-    baseRevenueImpact: 6.0,
-    baseAdoption: 58,
+    baseProductivity: 5.8,      // Calibrated for ~195% ROI
+    baseCostAvoidance: 4.5,
+    baseRevenueImpact: 7.5,
+    baseAdoption: 62,
     licenseMultiplier: 1.0,
     servicesMultiplier: 1.0
   },
   
-  // Operations Automation (Target: ~190% 3-year ROI)
+  // Operations Automation (Target: ~205% 3-year ROI)
   OPERATIONS_AUTOMATION: {
     name: 'Operations Automation',
     description: 'Backend process automation and optimization',
     productivityWeight: 0.45,
     costAvoidanceWeight: 0.45,
     revenueWeight: 0.10,
-    baseProductivity: 4.8,      // Calibrated for ~190% ROI
-    baseCostAvoidance: 7.5,
-    baseRevenueImpact: 2.0,
-    baseAdoption: 55,
+    baseProductivity: 6.2,      // Calibrated for ~205% ROI
+    baseCostAvoidance: 9.0,
+    baseRevenueImpact: 2.8,
+    baseAdoption: 60,
     licenseMultiplier: 0.9,
     servicesMultiplier: 1.0
   },
   
-  // Data Analytics / Fabric (Target: ~160% 3-year ROI)
+  // Data Analytics / Fabric (Target: ~180% 3-year ROI)
   DATA_ANALYTICS: {
     name: 'Data Analytics & AI',
     description: 'Advanced analytics and business intelligence',
     productivityWeight: 0.40,
     costAvoidanceWeight: 0.35,
     revenueWeight: 0.25,
-    baseProductivity: 5.0,      // Calibrated for ~160% ROI
-    baseCostAvoidance: 5.0,
-    baseRevenueImpact: 3.5,
-    baseAdoption: 50,
+    baseProductivity: 6.2,      // Calibrated for ~180% ROI
+    baseCostAvoidance: 6.2,
+    baseRevenueImpact: 4.5,
+    baseAdoption: 58,
     licenseMultiplier: 1.1,
     servicesMultiplier: 1.3
   },
   
-  // Default/Generic AI (Target: ~150% 3-year ROI)
+  // Default/Generic AI (Target: ~190% 3-year ROI)
   GENERIC_AI: {
     name: 'Generic AI Solution',
     description: 'Standard AI implementation',
     productivityWeight: 0.50,
     costAvoidanceWeight: 0.35,
     revenueWeight: 0.15,
-    baseProductivity: 4.5,      // Calibrated for ~150% ROI
-    baseCostAvoidance: 5.0,
-    baseRevenueImpact: 2.5,
-    baseAdoption: 55,
+    baseProductivity: 5.8,      // Calibrated for ~190% ROI
+    baseCostAvoidance: 6.2,
+    baseRevenueImpact: 3.2,
+    baseAdoption: 60,
     licenseMultiplier: 1.0,
     servicesMultiplier: 1.0
   }
@@ -178,34 +178,34 @@ export function getTEIFormula(useCase: UseCaseRecord): TEIFormula {
     // Clone base formula
     const baseFormula = { ...TEI_FORMULAS.PRODUCTIVITY_COPILOT };
     
-    // HIGH VALUE: Code generation (GitHub Copilot TEI: ~180%)
+    // HIGH VALUE: Code generation (Target: ~210%)
     if (name.includes('coding') || name.includes('developer') || name.includes('github')) {
-      baseFormula.baseProductivity = 6.5;
-      baseFormula.baseCostAvoidance = 4.5;
-      baseFormula.baseRevenueImpact = 2.0;
-      baseFormula.baseAdoption = 55;
+      baseFormula.baseProductivity = 7.5;
+      baseFormula.baseCostAvoidance = 5.5;
+      baseFormula.baseRevenueImpact = 2.5;
+      baseFormula.baseAdoption = 62;
       baseFormula.licenseMultiplier = 1.1;
     }
-    // MEDIUM-HIGH: Knowledge work (~160%)
+    // MEDIUM-HIGH: Knowledge work (~195%)
     else if (name.includes('search') || name.includes('knowledge') || name.includes('report') || name.includes('analyze')) {
-      baseFormula.baseProductivity = 5.8;
-      baseFormula.baseCostAvoidance = 4.0;
-      baseFormula.baseRevenueImpact = 1.8;
+      baseFormula.baseProductivity = 6.8;
+      baseFormula.baseCostAvoidance = 4.8;
+      baseFormula.baseRevenueImpact = 2.3;
+      baseFormula.baseAdoption = 63;
+    }
+    // MEDIUM: Interview, HR tools (~185%)
+    else if (name.includes('interview') || name.includes('screening') || name.includes('hr')) {
+      baseFormula.baseProductivity = 6.2;
+      baseFormula.baseCostAvoidance = 4.2;
+      baseFormula.baseRevenueImpact = 2.0;
       baseFormula.baseAdoption = 60;
     }
-    // MEDIUM: Interview, HR tools (~130%)
-    else if (name.includes('interview') || name.includes('screening') || name.includes('hr')) {
-      baseFormula.baseProductivity = 4.5;
-      baseFormula.baseCostAvoidance = 3.2;
-      baseFormula.baseRevenueImpact = 1.5;
-      baseFormula.baseAdoption = 50;
-    }
-    // LOWER: Legacy modernization (~110%)
+    // LOWER: Legacy modernization (~180%)
     else if (name.includes('legacy') || name.includes('generator') || name.includes('documentation')) {
-      baseFormula.baseProductivity = 3.8;
-      baseFormula.baseCostAvoidance = 2.8;
-      baseFormula.baseRevenueImpact = 1.2;
-      baseFormula.baseAdoption = 45;
+      baseFormula.baseProductivity = 5.8;
+      baseFormula.baseCostAvoidance = 4.0;
+      baseFormula.baseRevenueImpact = 1.9;
+      baseFormula.baseAdoption = 58;
     }
     
     return baseFormula;
@@ -220,17 +220,17 @@ export function getTEIFormula(useCase: UseCaseRecord): TEIFormula {
     
     const baseFormula = { ...TEI_FORMULAS.CUSTOMER_SERVICE_AI };
     
-    // HIGH IMPACT: Full contact center automation (~200%)
+    // HIGH IMPACT: Full contact center automation (Target: ~210%)
     if (name.includes('contact center') || name.includes('ccaas')) {
-      baseFormula.baseCostAvoidance = 10.0;
-      baseFormula.baseRevenueImpact = 4.5;
-      baseFormula.baseAdoption = 65;
+      baseFormula.baseCostAvoidance = 11.5;
+      baseFormula.baseRevenueImpact = 5.5;
+      baseFormula.baseAdoption = 67;
     }
-    // MEDIUM: Chatbots, self-service (~170%)
+    // MEDIUM: Chatbots, self-service (Target: ~200%)
     else if (name.includes('chatbot') || name.includes('self-service')) {
-      baseFormula.baseCostAvoidance = 8.5;
-      baseFormula.baseRevenueImpact = 4.0;
-      baseFormula.baseAdoption = 62;
+      baseFormula.baseCostAvoidance = 10.5;
+      baseFormula.baseRevenueImpact = 5.0;
+      baseFormula.baseAdoption = 65;
     }
     
     return baseFormula;
@@ -253,11 +253,11 @@ export function getTEIFormula(useCase: UseCaseRecord): TEIFormula {
     
     const baseFormula = { ...TEI_FORMULAS.RISK_COMPLIANCE };
     
-    // HIGH RISK: Fraud, AML (~220%)
+    // HIGH RISK: Fraud, AML (Target: ~220%)
     if (name.includes('fraud') || name.includes('aml')) {
-      baseFormula.baseCostAvoidance = 14.0;
-      baseFormula.baseAdoption = 60;
-      baseFormula.baseProductivity = 6.0;
+      baseFormula.baseCostAvoidance = 14.5;
+      baseFormula.baseAdoption = 65;
+      baseFormula.baseProductivity = 7.0;
     }
     
     return baseFormula;
@@ -271,10 +271,10 @@ export function getTEIFormula(useCase: UseCaseRecord): TEIFormula {
     
     const baseFormula = { ...TEI_FORMULAS.SALES_ENABLEMENT };
     
-    // HIGH REVENUE: Campaign optimization (~190%)
+    // HIGH REVENUE: Campaign optimization (Target: ~205%)
     if (name.includes('campaign') || name.includes('lead')) {
-      baseFormula.baseRevenueImpact = 7.0;
-      baseFormula.baseAdoption = 60;
+      baseFormula.baseRevenueImpact = 8.0;
+      baseFormula.baseAdoption = 64;
     }
     
     return baseFormula;
@@ -288,11 +288,11 @@ export function getTEIFormula(useCase: UseCaseRecord): TEIFormula {
     
     const baseFormula = { ...TEI_FORMULAS.OPERATIONS_AUTOMATION };
     
-    // HIGH EFFICIENCY: Loan ops, collections (~210%)
+    // HIGH EFFICIENCY: Loan ops, collections (Target: ~215%)
     if (name.includes('loan') || name.includes('collection') || name.includes('underwriting')) {
-      baseFormula.baseProductivity = 5.5;
-      baseFormula.baseCostAvoidance = 9.0;
-      baseFormula.baseAdoption = 58;
+      baseFormula.baseProductivity = 6.8;
+      baseFormula.baseCostAvoidance = 10.0;
+      baseFormula.baseAdoption = 62;
     }
     
     return baseFormula;
