@@ -7,6 +7,30 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Building2, Target, Package } from "lucide-react"
 import { useMasterData } from "@/hooks/use-master-data"
 
+// NEW use cases: All Collections + 10 recently added Loan Operations
+const newUseCaseNames = new Set([
+  // Collections (8 use cases)
+  'AI Predictive Collections Segmentation',
+  'AI Collections Outreach Orchestration',
+  'AI Dynamic Payment Plan Optimizer',
+  'AI Collections Sentiment & Compliance Monitor',
+  'AI Collections Performance Analytics',
+  'AI Fraud Detection in Collections',
+  'AI Conversational Collections Assistant',
+  'AI Early Warning & Proactive Collections',
+  // Recently added Loan Operations (10 use cases)
+  'AI Alternative Credit Scoring Engine',
+  'Real-Time Loan Decision Engine',
+  'AI Loan Application Fraud Detection',
+  'Autonomous Pre-Approval & Instant Offers',
+  'AI Loan Portfolio Risk Optimizer',
+  'Personalized Loan Product Recommender',
+  'AI Dynamic Interest Rate & Pricing Engine',
+  'AI Loan Servicing & Lifecycle Automation',
+  'Cross-Sell Intelligence for Loan Products',
+  'AI Loan Assistant & Onboarding Copilot'
+]);
+
 export function TimelineView() {
   const { useCases: masterUseCases, isLoading: csvLoading } = useMasterData()
 
@@ -65,9 +89,16 @@ export function TimelineView() {
                         <Card key={useCase.id} className="bg-white hover:shadow-md transition-shadow">
                           <CardHeader className="pb-3">
                             <div className="flex items-start justify-between gap-2 mb-2">
-                              <CardTitle className="text-sm font-semibold text-gray-900 leading-tight">
-                                {useCase.useCase}
-                              </CardTitle>
+                              <div className="flex items-center gap-2 flex-wrap flex-1">
+                                <CardTitle className="text-sm font-semibold text-gray-900 leading-tight">
+                                  {useCase.useCase}
+                                </CardTitle>
+                                {newUseCaseNames.has(useCase.useCase) && (
+                                  <span className="inline-flex items-center px-3 py-0.5 rounded-md text-[9px] font-bold bg-gradient-to-r from-yellow-50 to-amber-50 text-amber-800 border-2 border-amber-500 shrink-0 ml-1">
+                                    New
+                                  </span>
+                                )}
+                              </div>
                               {useCase.commercialCluster && (
                                 <Badge variant="outline" className="text-xs border-green-200 bg-green-50 text-green-700 shrink-0">
                                   {useCase.commercialCluster}

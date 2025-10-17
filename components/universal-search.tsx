@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useMasterData } from '@/hooks/use-master-data';
 import { UseCaseRecord } from '@/lib/csv-parser';
 import { useRouter } from 'next/navigation';
+import { UseCaseDetailDialog } from '@/components/use-case-detail-dialog';
 
 type FilterType = 'new' | 'high-roi' | 'medium-roi' | 'low-roi' | 'category' | 'type';
 
@@ -33,8 +34,32 @@ export function UniversalSearch() {
   }
   
   // Helper to check if a use case is newly added
-  const isNewUseCase = (group: string): boolean => {
-    return group === 'AI Collections & Recovery Hub' || group === 'AI‑Driven Loan Operations';
+  // NEW use cases: All Collections + 10 recently added Loan Operations
+  const newUseCaseNames = new Set([
+    // Collections (8 use cases)
+    'AI Predictive Collections Segmentation',
+    'AI Collections Outreach Orchestration',
+    'AI Dynamic Payment Plan Optimizer',
+    'AI Collections Sentiment & Compliance Monitor',
+    'AI Collections Performance Analytics',
+    'AI Fraud Detection in Collections',
+    'AI Conversational Collections Assistant',
+    'AI Early Warning & Proactive Collections',
+    // Recently added Loan Operations (10 use cases)
+    'AI Alternative Credit Scoring Engine',
+    'Real-Time Loan Decision Engine',
+    'AI Loan Application Fraud Detection',
+    'Autonomous Pre-Approval & Instant Offers',
+    'AI Loan Portfolio Risk Optimizer',
+    'Personalized Loan Product Recommender',
+    'AI Dynamic Interest Rate & Pricing Engine',
+    'AI Loan Servicing & Lifecycle Automation',
+    'Cross-Sell Intelligence for Loan Products',
+    'AI Loan Assistant & Onboarding Copilot'
+  ]);
+
+  const isNewUseCase = (useCaseName: string): boolean => {
+    return newUseCaseNames.has(useCaseName);
   };
 
   // Keyboard shortcut (Cmd+K or Ctrl+K)
@@ -103,7 +128,7 @@ export function UniversalSearch() {
             roi: uc.roi,
             link: '/use-cases',
             useCase: uc,
-            isNew: isNewUseCase(uc.group),
+            isNew: isNewUseCase(uc.useCase),
             score: maxScore
           });
         }
@@ -249,10 +274,18 @@ export function UniversalSearch() {
     searchUseCases(query);
   }, [query, searchUseCases]);
 
+  const [selectedUseCaseForDialog, setSelectedUseCaseForDialog] = useState<UseCaseRecord | null>(null);
+
   const handleResultClick = (result: SearchResult) => {
-    router.push(result.link);
-    setOpen(false);
-    setQuery('');
+    // If it's a use case, open the dialog instead of navigating
+    if (result.type === 'use-case' && result.useCase) {
+      setSelectedUseCaseForDialog(result.useCase);
+      setOpen(false);
+    } else {
+      router.push(result.link);
+      setOpen(false);
+      setQuery('');
+    }
   };
 
   const toggleFilter = (filter: string) => {
@@ -311,7 +344,7 @@ export function UniversalSearch() {
       {/* Search Button */}
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-3 px-5 py-2.5 text-sm text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-all border-2 border-gray-200 hover:border-blue-300 shadow-sm hover:shadow-md min-w-[320px]"
+        className="flex items-center gap-3 px-5 py-2.5 text-sm text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-all border-2 border-gray-200 hover:border-blue-300 shadow-sm hover:shadow-md min-w-[550px]"
       >
         <Search className="h-5 w-5 text-gray-400" />
         <span className="flex-1 text-left text-gray-500">Search use cases, categories...</span>
@@ -322,11 +355,11 @@ export function UniversalSearch() {
 
       {/* Search Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-3xl p-0 bg-white">
+        <DialogContent className="max-w-5xl p-0 bg-white">
           <DialogHeader className="sr-only">
             <DialogTitle>Search AI Use Cases</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col h-[600px]">
+          <div className="flex flex-col h-[700px]">
             {/* Search Input */}
             <div className="flex items-center gap-3 p-4 border-b border-gray-200">
               <Search className="h-5 w-5 text-gray-400" />
@@ -352,16 +385,16 @@ export function UniversalSearch() {
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-semibold text-gray-600 mr-2">Filters:</span>
                 
-                {/* NEW Filter */}
+                {/* New Filter */}
                 <button
                   onClick={() => toggleFilter('new')}
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                  className={`inline-flex items-center px-4 py-1 rounded-md text-xs font-semibold transition-all ${
                     activeFilters.has('new')
-                      ? 'bg-amber-400 text-amber-900 border-2 border-amber-600'
+                      ? 'bg-gradient-to-r from-yellow-50 to-amber-50 text-amber-800 border-2 border-amber-500'
                       : 'bg-white text-gray-600 border border-gray-300 hover:border-amber-400'
                   }`}
                 >
-                  NEW
+                  New
                 </button>
 
                 {/* ROI Filters */}
@@ -482,38 +515,38 @@ export function UniversalSearch() {
               )}
 
               {results.length > 0 && (
-                <div className="space-y-1">
+                <div className="space-y-2 px-2">
                   {results.map((result, index) => (
                     <button
                       key={index}
                       onClick={() => handleResultClick(result)}
-                      className="w-full flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left border border-transparent hover:border-gray-200"
+                      className="w-full flex items-start gap-4 p-4 rounded-xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all text-left border-2 border-transparent hover:border-blue-200 hover:shadow-md"
                     >
-                      <div className="mt-1">
+                      <div className="mt-0.5 p-2 bg-gray-100 rounded-lg">
                         {getIcon(result.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                          <p className="text-base font-semibold text-gray-900">
                             {result.title}
                           </p>
                           {result.isNew && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-400 text-amber-900 border border-amber-600 shrink-0">
-                              NEW
+                            <span className="inline-flex items-center px-3 py-0.5 rounded-md text-[10px] font-bold bg-gradient-to-r from-yellow-50 to-amber-50 text-amber-800 border-2 border-amber-500 shrink-0">
+                              New
                             </span>
                           )}
                           {result.roi && (
-                            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-xs shrink-0">
+                            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-xs font-semibold shrink-0">
                               {result.roi}% ROI
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500 truncate">
+                        <p className="text-sm text-gray-600 mb-1">
                           {result.subtitle}
                         </p>
-                      </div>
-                      <div className="shrink-0">
-                        {getTypeBadge(result.type)}
+                        <div className="flex items-center gap-2 mt-2">
+                          {getTypeBadge(result.type)}
+                        </div>
                       </div>
                     </button>
                   ))}
@@ -551,6 +584,17 @@ export function UniversalSearch() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Use Case Detail Dialog */}
+      <UseCaseDetailDialog
+        useCase={selectedUseCaseForDialog}
+        open={selectedUseCaseForDialog !== null}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setSelectedUseCaseForDialog(null);
+          }
+        }}
+      />
     </>
   );
 }
