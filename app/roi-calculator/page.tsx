@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button';
 import { TrendingUp, DollarSign, Users, Target, Calculator, Download, RefreshCw, Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMasterData } from '@/hooks/use-master-data';
-import { calculateUseCaseInvestment, getImplementationCostBucket } from '@/lib/csv-parser';
+import { getImplementationCostBucket } from '@/lib/csv-parser';
+import { calculateUseCaseROI } from '@/lib/roi-calculator';
 
 // Helper component for info tooltips
 const InfoTooltip = ({ content }: { content: string }) => (
@@ -229,25 +230,32 @@ export default function ROICalculatorPage() {
   const calculateFullROI = () => {
     const years = assumptions.yearsToCalculate;
     
-    // === CALCULATE ACTUAL SERVICES COST FROM USE CASES ===
+    // === CALCULATE ACTUAL SERVICES COST FROM USE CASES USING TEI METHODOLOGY ===
     let actualServicesCost = 0;
     let actualTotalInvestment = 0;
     let actualTotalBenefits = 0;
     
     useCases.forEach(uc => {
       const implBucket = getImplementationCostBucket(uc);
-      const investment = calculateUseCaseInvestment(uc);
-      const roi = uc.roi || 300;
-      const benefits = investment * (roi / 100);
+      const roiResult = calculateUseCaseROI(uc); // Use TEI-based calculation
       
       actualServicesCost += implBucket.cost;
-      actualTotalInvestment += investment;
-      actualTotalBenefits += benefits;
+      actualTotalInvestment += roiResult.investment;
+      actualTotalBenefits += roiResult.fiveYearBenefit; // Use 3-year risk-adjusted benefit
     });
     
     // Apply services cost multiplier
     const adjustedServicesCost = actualServicesCost * (assumptions.servicesCostMultiplier / 100);
-    const actualWeightedROI = actualTotalInvestment > 0 ? ((actualTotalBenefits / actualTotalInvestment) - 1) * 100 : 0;
+    const actualNetBenefit = actualTotalBenefits - actualTotalInvestment;
+    const actualWeightedROI = actualTotalInvestment > 0 ? (actualNetBenefit / actualTotalInvestment) * 100 : 0;
+    
+    console.log('=== ROI CALCULATOR - ACTUAL USE CASE DATA ===');
+    console.log(`Total Use Cases: ${useCases.length}`);
+    console.log(`Services Cost: $${(actualServicesCost / 1000000).toFixed(2)}M`);
+    console.log(`Total Investment: $${(actualTotalInvestment / 1000000).toFixed(2)}M`);
+    console.log(`Total Benefits: $${(actualTotalBenefits / 1000000).toFixed(2)}M`);
+    console.log(`Net Benefit: $${(actualNetBenefit / 1000000).toFixed(2)}M`);
+    console.log(`Weighted ROI: ${actualWeightedROI.toFixed(0)}%`);
     
     // === YEAR-BY-YEAR CALCULATION WITH ADOPTION RAMP ===
     

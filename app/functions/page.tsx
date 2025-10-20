@@ -143,18 +143,38 @@ export default function FunctionsPage() {
       let grandTotalBenefit = 0;
       let grandTotalServicesCost = 0;
       
+      // Track tier distribution
+      const tierCounts = { 'Tier 1': 0, 'Tier 2': 0, 'Tier 3': 0 };
+      const tierCosts = { 'Tier 1': 0, 'Tier 2': 0, 'Tier 3': 0 };
+      
       useCases.forEach(uc => {
         const roiResult = calculateUseCaseROI(uc);
         const implBucket = getImplementationCostBucket(uc);
         grandTotalInvestment += roiResult.investment;
         grandTotalBenefit += roiResult.fiveYearBenefit;
         grandTotalServicesCost += implBucket.cost;
+        
+        // Track tiers
+        tierCounts[implBucket.tier]++;
+        tierCosts[implBucket.tier] += implBucket.cost;
       });
       
       // Store in state for header display
       const grandTotalNetBenefit = grandTotalBenefit - grandTotalInvestment;
       setGrandTotalValue(grandTotalNetBenefit);
       setGrandTotalServicesCost(grandTotalServicesCost);
+      
+      console.log('=== GRAND TOTAL (ALL USE CASES) ===');
+      console.log(`Total Use Cases: ${useCases.length}`);
+      console.log(`Services Cost: $${(grandTotalServicesCost / 1000000).toFixed(2)}M`);
+      console.log(`Total Investment: $${(grandTotalInvestment / 1000000).toFixed(2)}M`);
+      console.log(`Total Benefit: $${(grandTotalBenefit / 1000000).toFixed(2)}M`);
+      console.log(`Net Value: $${(grandTotalNetBenefit / 1000000).toFixed(2)}M`);
+      console.log('\n=== TIER BREAKDOWN ===');
+      console.log(`Tier 1: ${tierCounts['Tier 1']} use cases = $${(tierCosts['Tier 1'] / 1000000).toFixed(2)}M`);
+      console.log(`Tier 2: ${tierCounts['Tier 2']} use cases = $${(tierCosts['Tier 2'] / 1000000).toFixed(2)}M`);
+      console.log(`Tier 3: ${tierCounts['Tier 3']} use cases = $${(tierCosts['Tier 3'] / 1000000).toFixed(2)}M`);
+      console.log(`Average: $${(grandTotalServicesCost / useCases.length / 1000).toFixed(1)}K per use case`);
       
       // Define strategic functions mapping to categories
       // Only include the 9 core strategic functions (0-8), exclude "Other" categories and In-flight
