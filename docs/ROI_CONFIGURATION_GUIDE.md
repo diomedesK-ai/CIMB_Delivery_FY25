@@ -309,3 +309,4 @@ Weighted ROI Value = Cluster Value × (Average ROI / 100)
 - **Value Calculation**: See `COMMERCIAL_OFFER_STRUCTURE.md`
 
 
+

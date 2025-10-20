@@ -396,3 +396,4 @@ Source: [McKinsey - Analytics-Enabled Collections Model](https://www.mckinsey.co
 **Last Updated:** October 17, 2025
 **Next Review:** January 2026
 
+

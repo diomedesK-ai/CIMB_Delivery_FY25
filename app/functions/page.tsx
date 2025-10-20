@@ -61,6 +61,10 @@ export default function FunctionsPage() {
   const [editingFunctionROI, setEditingFunctionROI] = useState(false);
   const [functionROIInput, setFunctionROIInput] = useState<string>('');
   const [manualROIOverrides, setManualROIOverrides] = useState<{ [functionName: string]: number }>({});
+  
+  // Grand totals across ALL 169 use cases (for header display)
+  const [grandTotalValue, setGrandTotalValue] = useState(0);
+  const [grandTotalServicesCost, setGrandTotalServicesCost] = useState(0);
 
   // Get available clusters from master data
   const availableClusters = useMemo(() => {
@@ -134,6 +138,24 @@ export default function FunctionsPage() {
 
   useEffect(() => {
     if (useCases.length > 0) {
+      // FIRST: Calculate grand totals across ALL 169 use cases for the header
+      let grandTotalInvestment = 0;
+      let grandTotalBenefit = 0;
+      let grandTotalServicesCost = 0;
+      
+      useCases.forEach(uc => {
+        const roiResult = calculateUseCaseROI(uc);
+        const implBucket = getImplementationCostBucket(uc);
+        grandTotalInvestment += roiResult.investment;
+        grandTotalBenefit += roiResult.fiveYearBenefit;
+        grandTotalServicesCost += implBucket.cost;
+      });
+      
+      // Store in state for header display
+      const grandTotalNetBenefit = grandTotalBenefit - grandTotalInvestment;
+      setGrandTotalValue(grandTotalNetBenefit);
+      setGrandTotalServicesCost(grandTotalServicesCost);
+      
       // Define strategic functions mapping to categories
       // Only include the 9 core strategic functions (0-8), exclude "Other" categories and In-flight
       const functionMapping: { [key: string]: { id: number; name: string; description: string; color: string } } = {
@@ -290,19 +312,19 @@ export default function FunctionsPage() {
             <div className="flex items-center gap-2">
               <Zap className="h-5 w-5 text-purple-600" />
               <span className="text-sm font-semibold text-gray-700">
-                {functions.reduce((sum, f) => sum + f.useCaseCount, 0)} Use Cases
+                {useCases.length} Use Cases
               </span>
             </div>
             <div className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-green-600" />
               <span className="text-sm font-semibold text-gray-700">
-                {formatCurrency(functions.reduce((sum, f) => sum + f.totalValue, 0))} Total Value
+                {formatCurrency(grandTotalValue)} Total Value
               </span>
             </div>
             <div className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-orange-600" />
               <span className="text-sm font-semibold text-gray-700">
-                {formatCurrency(functions.reduce((sum, f) => sum + f.totalImplementationCost, 0))} Services Cost
+                {formatCurrency(grandTotalServicesCost)} Services Cost
               </span>
             </div>
           </div>

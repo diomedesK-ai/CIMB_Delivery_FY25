@@ -207,3 +207,4 @@ export function generateForresterCitation(source: ForresterTEISource): string {
   return `${source.title}, Forrester Consulting, ${source.year}. Available at: ${source.url}`;
 }
 
+

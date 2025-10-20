@@ -273,3 +273,4 @@ const [calculatedROI, setCalculatedROI] = useState({
 **Status**: Ready for Testing  
 **Impact**: Improves transparency, validation, and scenario planning for services costs
 
+

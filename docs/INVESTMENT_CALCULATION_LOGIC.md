@@ -228,3 +228,4 @@ This allows:
 *Note: These are baseline estimates. Actual costs will vary based on client scale, deployment approach, and specific requirements. All values are editable in the UI for scenario planning.*
 
 
+

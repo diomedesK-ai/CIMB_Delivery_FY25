@@ -501,15 +501,15 @@ export function getImplementationCostBucket(useCase: UseCaseRecord): {
   // UPDATED: Flat-rate model to hit $18M target (~$107k per use case)
   // This aligns with roi-calculator.ts for consistency across all pages
   
-  // Tier 3: Score >= 40 → $145K-$175K
+  // Tier 3: Score >= 40 → $137K-$167K (ADJUSTED to hit $18M target)
   if (complexityScore >= 40) {
     let cost: number;
     if (complexityScore >= 60) {
-      cost = 175000; // Maximum complexity
+      cost = 167000; // Maximum complexity (was 175K)
     } else if (complexityScore >= 50) {
-      cost = 160000; // Very high complexity
+      cost = 152000; // Very high complexity (was 160K)
     } else {
-      cost = 145000; // High complexity
+      cost = 137000; // High complexity (was 145K)
     }
     
     return {
@@ -519,17 +519,17 @@ export function getImplementationCostBucket(useCase: UseCaseRecord): {
     };
   }
   
-  // Tier 2: Score >= 20 → $118K-$135K
+  // Tier 2: Score >= 20 → $110K-$127K (ADJUSTED to hit $18M target)
   if (complexityScore >= 20) {
     let cost: number;
     if (complexityScore >= 30) {
-      cost = 135000; // Upper medium complexity
+      cost = 127000; // Upper medium complexity (was 135K)
     } else if (complexityScore >= 25) {
-      cost = 128000; // Medium-high complexity
+      cost = 120000; // Medium-high complexity (was 128K)
     } else if (complexityScore >= 22) {
-      cost = 122000; // Medium complexity
+      cost = 114000; // Medium complexity (was 122K)
     } else {
-      cost = 118000; // Lower medium complexity
+      cost = 110000; // Lower medium complexity (was 118K)
     }
     
     return {
@@ -539,17 +539,17 @@ export function getImplementationCostBucket(useCase: UseCaseRecord): {
     };
   }
   
-  // Tier 1: Score < 20 → $106K-$118K (FINAL ADJUSTMENT to hit exactly $18M target)
-  // 154 use cases at lowest tier, need ~$107k average across all 169 = $18M total
+  // Tier 1: Score < 20 → $98K-$110K (ADJUSTED to hit exactly $18M target)
+  // 128 use cases at Tier 1, 37 at Tier 2, 4 at Tier 3 = $18M total
   let cost: number;
   if (complexityScore >= 15) {
-    cost = 118000; // Upper low complexity
+    cost = 110000; // Upper low complexity (was 118K)
   } else if (complexityScore >= 10) {
-    cost = 110000; // Medium-high low complexity
+    cost = 103000; // Medium-high low complexity (fine-tuned to hit $18M)
   } else if (complexityScore >= 5) {
-    cost = 107000; // Medium low complexity
+    cost = 100000; // Medium low complexity (fine-tuned to hit $18M)
   } else {
-    cost = 106000; // Basic implementation
+    cost = 98000; // Basic implementation (was 106K)
   }
   
   return {
