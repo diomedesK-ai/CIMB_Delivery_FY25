@@ -135,7 +135,18 @@ export function getDefaultROIParameters(useCase: UseCaseRecord): ROIParameters {
   };
 }
 
+// TARGET COST STRUCTURE (from partnership agreement):
+// Total Investment: $181M USD (5 years, with $21M discount)
+// - Microsoft Partnership Cost: $119M (licenses + Azure + MS services)
+// - Other Cost: $62M (internal teams, other vendors, training)
+// 
+// Breakdown:
+// - Services (MS Partners): ~$18.67M (11% of total)
+// - Licenses + Azure: ~$100.33M (55% of total, part of MS Partnership)
+// - Internal/Other: ~$62M (34% of total)
+
 // Calculate investment (5-year TCO) for a use case using TEI methodology
+// CALIBRATED to hit $181M total across 169 use cases
 export function calculateInvestment(useCase: UseCaseRecord, usersAffected: number): number {
   // Get TEI formula for multipliers
   const formula = getTEIFormula(useCase);
@@ -147,15 +158,15 @@ export function calculateInvestment(useCase: UseCaseRecord, usersAffected: numbe
   
   // If still 0, calculate realistic 5-year TCO using TEI formula
   if (investment === 0) {
-    // License: $35/user/month × 60 months (adjusted by formula multiplier)
-    const baseLicenseCostPerUser = 35;
+    // LICENSE COSTS: Scaled up to hit $100M+ total (was $35/user/month, now $70/user/month)
+    const baseLicenseCostPerUser = 70; // Doubled to match actual partnership costs
     const totalLicenseCost = usersAffected * baseLicenseCostPerUser * 60 * formula.licenseMultiplier;
     
     // Implementation & Services: FIXED to hit $18M total target (~$107k per use case average)
     // SYNCED with csv-parser.ts getImplementationCostBucket() for exact consistency
     let baseServicesCost = 110000; // Base: $110k per use case (Tier 1 average)
     
-    // Variance based on user count to match complexity scoring (Tier 1: $103K-$118K)
+    // Variance based on user count to match complexity scoring
     if (usersAffected < 300) {
       baseServicesCost = 105000;  // Small: $105k (Tier 1 low)
     } else if (usersAffected >= 1000) {
@@ -168,13 +179,20 @@ export function calculateInvestment(useCase: UseCaseRecord, usersAffected: numbe
     
     const implementationCost = baseServicesCost * formula.servicesMultiplier;
     
-    // Annual support/training: $120/user/year × 5 years
-    const supportCost = usersAffected * 120 * 5;
+    // INTERNAL/OTHER COSTS: Scaled up to hit $62M total (training, change mgmt, internal teams)
+    // Was: $120/user/year × 5 years = $600/user
+    // Now: $700/user/year × 5 years = $3,500/user (5.8x increase to hit $62M target)
+    const internalCost = usersAffected * 700 * 5;
     
-    // Platform/Infrastructure costs (Azure, etc.) - economies of scale
-    const platformCost = Math.max(35000, usersAffected * 60);
+    // AZURE PLATFORM/INFRASTRUCTURE: Scaled up significantly for AI workloads
+    // Was: Max($35K, $60/user)
+    // Now: Max($100K, $200/user) to account for:
+    // - Azure OpenAI consumption
+    // - Microsoft Fabric
+    // - Other Azure services (Storage, Compute, Networking)
+    const platformCost = Math.max(100000, usersAffected * 200);
     
-    investment = totalLicenseCost + implementationCost + supportCost + platformCost;
+    investment = totalLicenseCost + implementationCost + internalCost + platformCost;
   }
   
   return Math.max(investment, 10000);
