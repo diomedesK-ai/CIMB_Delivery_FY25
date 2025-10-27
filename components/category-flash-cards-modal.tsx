@@ -13,7 +13,7 @@ interface CategoryFlashCardsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdateCluster?: (useCaseId: string, cluster: string) => void;
-  onUpdateValueSize?: (useCaseId: string, valueSize: 'Small' | 'Medium' | 'Large') => void;
+  onUpdateValueSize?: (useCaseId: string, valueSize: 'Small' | 'Medium' | 'Large' | 'Option A' | 'Option B' | 'Both') => void;
   availableClusters?: string[];
 }
 

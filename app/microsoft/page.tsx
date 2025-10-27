@@ -642,9 +642,9 @@ export default function MicrosoftDashboard() {
                                             <SelectValue placeholder="Select offer..." />
                                           </SelectTrigger>
                                           <SelectContent>
-                                            <SelectItem value="Small">Small - $50M: Base offering</SelectItem>
-                                            <SelectItem value="Medium">Medium - $75M: Small + additional features</SelectItem>
-                                            <SelectItem value="Large">Large - $250M: Medium + premium features</SelectItem>
+                                            <SelectItem value="Option A">Option A (75M USD)</SelectItem>
+                                            <SelectItem value="Option B">Option B (200M USD)</SelectItem>
+                                            <SelectItem value="Both">Both</SelectItem>
                                           </SelectContent>
                                         </Select>
                                       </div>

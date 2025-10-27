@@ -1,0 +1,41 @@
+UseCaseCategory,Users,TokensInputPerMonth,TokensOutputPerMonth,CostPerMonthUSD,ConsumptionPerAnnumUSD
+Synthetic Customers,8,6000000,60000000,405.90,4464.90
+BIAN Mapping API Discovery,7000,70000000,700000000,4735.50,52090.50
+ECOM Onboarding,850,127500000,1275000000,8625.38,94879.13
+Paralegal Review,40,6000000,60000000,405.90,4464.90
+Knowledge Management,840,252000000,2520000000,17047.80,187525.80
+HO Doc Categorisation,60,600000,6000000,40.59,446.49
+Creative Channels,250,6250000,62500000,422.81,4650.94
+Transaction Monitoring,23,16875000,168750000,1141.59,12557.53
+FE Code Generation,2,630000,6300000,42.62,468.81
+Risk Systemic Issues,2,720000,7200000,48.71,535.79
+Test Automation,4,3780000,37800000,255.72,2812.89
+Credit Memo,70,7000000,70000000,473.55,5209.05
+
+FrequencyOfUse,SessionsPerMonth
+Light,2
+Medium,5
+Frequent,30
+Intense,400
+
+Intensity,TurnsPerSession
+Low,2
+Medium,5
+High,10
+Intense,30
+
+Complexity,TokensInput,TokensOutput
+Low,300,5000
+Medium,1000,10000
+High,2000,20000
+Very High,5000,50000
+
+Model,InputCostPerMillionTokens,OutputCostPerMillionTokens
+GPT4O,0.0000025,0.00001
+GPT4O-Mini,0.00000015,0.0000006
+O1-Mini,0.0000121,0.0000484
+O3-Mini,0.0000011,0.0000044
+
+UnitsOfTokens,1000000
+WorkingMonthsPerYear,11
+

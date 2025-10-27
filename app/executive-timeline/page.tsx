@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Calendar, Info } from 'lucide-react';
-import { calculateUseCaseInvestment, determineCostModel } from '@/lib/csv-parser';
+import { calculateUseCaseInvestmentDetailed, determineCostModel } from '@/lib/csv-parser';
 
 type ViewMode = 'program' | 'customer-facing' | 'operations-facing';
 
@@ -250,8 +250,8 @@ export default function ExecutiveTimelinePage() {
     );
     
     if (masterData) {
-      const costModel = determineCostModel(masterData);
-      const investment = calculateUseCaseInvestment(masterData);
+      const costModel = determineCostModel(masterData.microsoftProducts);
+      const investment = calculateUseCaseInvestmentDetailed(masterData);
       
       return {
         ...masterData,

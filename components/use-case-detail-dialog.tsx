@@ -198,7 +198,10 @@ function generateDescription(useCase: UseCaseRecord): string {
   }
   
   // Default description based on category and name
-  return `This AI-powered solution leverages Microsoft Azure and AI technologies to transform ${subCategory} operations. By automating manual processes, providing intelligent insights, and enabling data-driven decisions, this use case helps ${useCase.departments.slice(0, 2).join(' and ')} teams improve efficiency, reduce costs, and deliver better outcomes.`;
+  const deptText = Array.isArray(useCase.departments) && useCase.departments.length > 0 
+    ? useCase.departments.slice(0, 2).join(' and ') 
+    : 'banking';
+  return `This AI-powered solution leverages Microsoft Azure and AI technologies to transform ${subCategory} operations. By automating manual processes, providing intelligent insights, and enabling data-driven decisions, this use case helps ${deptText} teams improve efficiency, reduce costs, and deliver better outcomes.`;
 }
 
 interface UseCaseDetailDialogProps {
@@ -222,6 +225,7 @@ export function UseCaseDetailDialog({
 }: UseCaseDetailDialogProps) {
   const [selectedCluster, setSelectedCluster] = useState<string | undefined>(useCase?.commercialCluster);
   const [selectedValueSize, setSelectedValueSize] = useState<string | undefined>(useCase?.clusterValueSize);
+  const [startDate, setStartDate] = useState<string | undefined>(useCase?.startDate);
   const [implementationSize, setImplementationSize] = useState<string>(useCase?.implementationCostBucket || 'M');
   const [costEstimation, setCostEstimation] = useState<string>(useCase?.costEstimation || 'M');
   const [editingDepartments, setEditingDepartments] = useState(false);
@@ -233,6 +237,9 @@ export function UseCaseDetailDialog({
   const [roi, setRoi] = useState<number>(useCase?.roi || 300);
   const [editingROI, setEditingROI] = useState(false);
   const [roiInputValue, setRoiInputValue] = useState<string>(useCase?.roi?.toString() || '300');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   
   // TEI-based ROI Calculation Parameters (initialized from use case or defaults)
   const [roiParams, setRoiParams] = useState<ROIParameters>(
@@ -253,6 +260,7 @@ export function UseCaseDetailDialog({
     if (useCase) {
       setSelectedCluster(useCase.commercialCluster);
       setSelectedValueSize(useCase.clusterValueSize);
+      setStartDate(useCase.startDate);
       setImplementationSize(useCase.implementationCostBucket || 'M');
       setCostEstimation(useCase.costEstimation || 'M');
       setDepartments(useCase.departments || []);
@@ -274,43 +282,38 @@ export function UseCaseDetailDialog({
       setEditingKPIs(false);
       setEditingProducts(false);
       setEditingROI(false);
+      
+      // Reset save states
+      setHasUnsavedChanges(false);
+      setSaveSuccess(false);
     }
   }, [useCase]);
 
   if (!useCase) return null;
 
-  const handleClusterChange = async (value: string) => {
+  const handleClusterChange = (value: string) => {
     setSelectedCluster(value);
-    if (onUpdateCluster) {
-      onUpdateCluster(useCase.id, value);
-    }
-    if (onUpdateUseCase) {
-      await onUpdateUseCase(useCase.id, { commercialCluster: value === 'unassigned' ? undefined : value });
-    }
+    setHasUnsavedChanges(true);
   };
 
-  const handleValueSizeChange = async (value: string) => {
+  const handleValueSizeChange = (value: string) => {
     setSelectedValueSize(value);
-    if (onUpdateValueSize && (value === 'Small' || value === 'Medium' || value === 'Large')) {
-      onUpdateValueSize(useCase.id, value);
-    }
-    if (onUpdateUseCase) {
-      await onUpdateUseCase(useCase.id, { clusterValueSize: value as 'Small' | 'Medium' | 'Large' });
-    }
+    setHasUnsavedChanges(true);
   };
 
-  const handleImplementationSizeChange = async (value: string) => {
+  const handleStartDateChange = (value: string) => {
+    setStartDate(value);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleImplementationSizeChange = (value: string) => {
     setImplementationSize(value);
-    if (onUpdateUseCase) {
-      await onUpdateUseCase(useCase.id, { implementationCostBucket: value });
-    }
+    setHasUnsavedChanges(true);
   };
 
-  const handleCostEstimationChange = async (value: string) => {
+  const handleCostEstimationChange = (value: string) => {
     setCostEstimation(value);
-    if (onUpdateUseCase) {
-      await onUpdateUseCase(useCase.id, { costEstimation: value });
-    }
+    setHasUnsavedChanges(true);
   };
 
   const saveDepartments = async () => {
@@ -359,6 +362,40 @@ export function UseCaseDetailDialog({
       if (onOpenChange) {
         onOpenChange(false);
       }
+    }
+  };
+
+  // Save all changes to CSV
+  const saveAllChanges = async () => {
+    if (!onUpdateUseCase || !hasUnsavedChanges) return;
+    
+    setIsSaving(true);
+    setSaveSuccess(false);
+    
+    try {
+      await onUpdateUseCase(useCase.id, {
+        commercialCluster: selectedCluster === 'unassigned' ? undefined : selectedCluster,
+        clusterValueSize: selectedValueSize as any,
+        startDate: startDate,
+        implementationCostBucket: implementationSize,
+        costEstimation: costEstimation,
+        departments,
+        kpis,
+        microsoftProducts: products,
+        roi
+      });
+      
+      setHasUnsavedChanges(false);
+      setSaveSuccess(true);
+      
+      // Show success message briefly
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to save changes:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -424,6 +461,31 @@ export function UseCaseDetailDialog({
 
             <Separator className="bg-gray-200" />
 
+            {/* Start Date */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-gray-900">Start Date</h3>
+              <Select 
+                value={startDate || ''} 
+                onValueChange={handleStartDateChange}
+              >
+                <SelectTrigger className="w-full border-gray-200">
+                  <SelectValue placeholder="Select start year..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Y1">Y1 (Year 1)</SelectItem>
+                  <SelectItem value="Y2">Y2 (Year 2)</SelectItem>
+                  <SelectItem value="Y3">Y3 (Year 3)</SelectItem>
+                  <SelectItem value="Y4">Y4 (Year 4)</SelectItem>
+                  <SelectItem value="Y5">Y5 (Year 5)</SelectItem>
+                </SelectContent>
+              </Select>
+              {startDate && (
+                <p className="text-xs text-gray-500">
+                  Use case will start in {startDate}
+                </p>
+              )}
+            </div>
+
             {/* Commercial Cluster Assignment */}
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-gray-900">Commercial Cluster</h3>
@@ -458,16 +520,16 @@ export function UseCaseDetailDialog({
                   <SelectValue placeholder="Select value size..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Small">Small ($50M USD)</SelectItem>
-                  <SelectItem value="Medium">Medium ($75M USD)</SelectItem>
-                  <SelectItem value="Large">Large ($120M USD)</SelectItem>
+                  <SelectItem value="Option A">Option A (75M USD)</SelectItem>
+                  <SelectItem value="Option B">Option B (200M USD)</SelectItem>
+                  <SelectItem value="Both">Both</SelectItem>
                 </SelectContent>
               </Select>
               {selectedValueSize && (
                 <p className="text-xs text-gray-500">
-                  {selectedValueSize === 'Small' && 'Estimated value: $50M USD'}
-                  {selectedValueSize === 'Medium' && 'Estimated value: $75M USD'}
-                  {selectedValueSize === 'Large' && 'Estimated value: $120M USD'}
+                  {selectedValueSize === 'Option A' && 'Estimated value: 75M USD'}
+                  {selectedValueSize === 'Option B' && 'Estimated value: 200M USD'}
+                  {selectedValueSize === 'Both' && 'Combined offering'}
                 </p>
               )}
             </div>
@@ -787,7 +849,7 @@ export function UseCaseDetailDialog({
               {editingDepartments ? (
                 <div className="space-y-2">
                   <textarea
-                    value={departments.join('\n')}
+                    value={Array.isArray(departments) ? departments.join('\n') : ''}
                     onChange={(e) => setDepartments(e.target.value.split('\n').filter(d => d.trim()))}
                     className="w-full min-h-[100px] p-2 text-sm border border-gray-300 rounded"
                     placeholder="Enter departments (one per line)"
@@ -840,7 +902,7 @@ export function UseCaseDetailDialog({
               {editingKPIs ? (
                 <div className="space-y-2">
                   <textarea
-                    value={kpis.join('\n')}
+                    value={Array.isArray(kpis) ? kpis.join('\n') : ''}
                     onChange={(e) => setKpis(e.target.value.split('\n').filter(k => k.trim()))}
                     className="w-full min-h-[100px] p-2 text-sm border border-gray-300 rounded"
                     placeholder="Enter KPIs (one per line)"
@@ -893,7 +955,7 @@ export function UseCaseDetailDialog({
               {editingProducts ? (
                 <div className="space-y-2">
                   <textarea
-                    value={products.join('\n')}
+                    value={Array.isArray(products) ? products.join('\n') : ''}
                     onChange={(e) => setProducts(e.target.value.split('\n').filter(p => p.trim()))}
                     className="w-full min-h-[120px] p-2 text-sm border border-gray-300 rounded"
                     placeholder="Enter products (one per line)"
@@ -986,6 +1048,42 @@ export function UseCaseDetailDialog({
                       </Badge>
                     ))}
                   </div>
+                </div>
+              </>
+            )}
+
+            {/* Save Button - Fixed at bottom */}
+            {hasUnsavedChanges && (
+              <>
+                <Separator className="bg-gray-200 mt-6" />
+                <div className="sticky bottom-0 bg-white pt-4 pb-2">
+                  <button
+                    onClick={saveAllChanges}
+                    disabled={isSaving}
+                    className={`w-full py-3 rounded-lg font-semibold text-white transition-all ${
+                      saveSuccess 
+                        ? 'bg-green-600 hover:bg-green-700' 
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    } ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isSaving ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="animate-spin">⏳</span>
+                        Saving...
+                      </span>
+                    ) : saveSuccess ? (
+                      <span className="flex items-center justify-center gap-2">
+                        ✓ Saved to CSV
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center gap-2">
+                        ✓ Save Changes to CSV
+                      </span>
+                    )}
+                  </button>
+                  <p className="text-xs text-gray-500 text-center mt-2">
+                    Changes will be saved to master-use-cases.csv
+                  </p>
                 </div>
               </>
             )}

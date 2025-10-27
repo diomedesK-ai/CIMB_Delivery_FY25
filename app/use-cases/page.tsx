@@ -18,7 +18,7 @@ export default function UseCasesPage() {
     }
   };
 
-  const handleUpdateValueSize = async (useCaseId: string, valueSize: 'Small' | 'Medium' | 'Large') => {
+  const handleUpdateValueSize = async (useCaseId: string, valueSize: 'Small' | 'Medium' | 'Large' | 'Option A' | 'Option B' | 'Both') => {
     try {
       await updateUseCase(useCaseId, { clusterValueSize: valueSize });
     } catch (error) {

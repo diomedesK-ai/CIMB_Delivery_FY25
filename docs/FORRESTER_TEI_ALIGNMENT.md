@@ -261,3 +261,5 @@ Our ROI calculation engine is now **fully aligned with Forrester TEI methodology
 **Key Takeaway:** Every ROI percentage shown in the application is derived from Forrester's validated formulas, not arbitrary estimates.
 
 
+
+

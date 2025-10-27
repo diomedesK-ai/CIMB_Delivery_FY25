@@ -12,7 +12,7 @@ export interface UseCaseRecord {
   kpis: string[];
   microsoftProducts: string[];
   commercialCluster?: string; // commercial cluster assignment
-  clusterValueSize?: 'Small' | 'Medium' | 'Large'; // Small (50M USD), Medium (75M USD), Large (120M USD)
+  clusterValueSize?: 'Small' | 'Medium' | 'Large' | 'Option A' | 'Option B' | 'Both'; // Option A (75M USD), Option B (200M USD), Both
   roi?: number; // Return on Investment percentage (e.g., 150 = 150% ROI)
   costModel?: 'License' | 'ACR' | 'Hybrid'; // License, Azure Consumption, or both
   licenseCount?: number; // Number of licenses needed
@@ -326,6 +326,9 @@ function generateTags(group: string, subCategory: string, useCase: string): stri
  * Determine cost model based on Microsoft products used
  */
 export function determineCostModel(products: string[]): 'License' | 'ACR' | 'Hybrid' {
+  if (!Array.isArray(products)) {
+    products = [];
+  }
   const productsStr = products.join(' ').toLowerCase();
   
   const hasLicense = productsStr.includes('365 copilot') || 
@@ -349,6 +352,9 @@ export function determineCostModel(products: string[]): 'License' | 'ACR' | 'Hyb
  * Get default license cost per user based on product
  */
 export function getDefaultLicenseCost(products: string[]): number {
+  if (!Array.isArray(products)) {
+    products = [];
+  }
   const productsStr = products.join(' ').toLowerCase();
   
   if (productsStr.includes('365 copilot')) return 30; // $30/user/month
@@ -364,6 +370,9 @@ export function getDefaultLicenseCost(products: string[]): number {
  * Conservative estimates for realistic bank deployments
  */
 export function getDefaultLicenseCount(departments: string[], useCase: string): number {
+  if (!Array.isArray(departments)) {
+    departments = [];
+  }
   const lowerCase = useCase.toLowerCase();
   
   // Enterprise-wide use cases (M365 Copilot for most office workers)
@@ -396,6 +405,9 @@ export function getDefaultLicenseCount(departments: string[], useCase: string): 
  * Conservative estimates for pilot/initial deployments
  */
 export function getDefaultACRSpend(products: string[], useCase: string): number {
+  if (!Array.isArray(products)) {
+    products = [];
+  }
   const productsStr = products.join(' ').toLowerCase();
   const lowerCase = useCase.toLowerCase();
   
@@ -431,8 +443,10 @@ export function getImplementationCostBucket(useCase: UseCaseRecord): {
   description: string;
 } {
   const lowerCase = useCase.useCase.toLowerCase();
-  const productsStr = useCase.microsoftProducts.join(' ').toLowerCase();
-  const deptCount = useCase.departments.length;
+  const products = Array.isArray(useCase.microsoftProducts) ? useCase.microsoftProducts : [];
+  const productsStr = products.join(' ').toLowerCase();
+  const departments = Array.isArray(useCase.departments) ? useCase.departments : [];
+  const deptCount = departments.length;
   
   // Calculate complexity score
   let complexityScore = 0;
@@ -588,6 +602,76 @@ export function calculateUseCaseInvestment(useCase: UseCaseRecord): number {
   }
   
   return licenseCost + acrCost + implementation;
+}
+
+/**
+ * Calculate detailed investment breakdown per use case (3-year TCO)
+ */
+export function calculateUseCaseInvestmentDetailed(useCase: UseCaseRecord): {
+  licenseCost: number;
+  licenseCount: number;
+  licenseCostPerUser: number;
+  acrCost: number;
+  acrMonthlySpend: number;
+  implementationCost: number;
+  totalInvestment: number;
+  costModel: 'License' | 'ACR' | 'Hybrid';
+} {
+  // Defensive: Ensure arrays are valid
+  const departments = Array.isArray(useCase.departments) ? useCase.departments : [];
+  const products = Array.isArray(useCase.microsoftProducts) ? useCase.microsoftProducts : [];
+  const useCaseName = useCase.useCase || 'Unknown Use Case';
+  
+  console.log('📊 Calculating investment for:', useCaseName);
+  console.log('  - Departments:', departments);
+  console.log('  - Products:', products);
+  
+  const costModel = useCase.costModel || determineCostModel(products);
+  console.log('  - Cost Model:', costModel);
+  const months = 36; // 3-year period (matching Forrester)
+  
+  let licenseCost = 0;
+  let licenseCount = 0;
+  let licenseCostPerUser = 0;
+  let acrCost = 0;
+  let acrMonthlySpend = 0;
+  let implementationCost = useCase.implementationCost || 0;
+  
+  if (costModel === 'License' || costModel === 'Hybrid') {
+    licenseCount = useCase.licenseCount || getDefaultLicenseCount(departments, useCaseName);
+    licenseCostPerUser = useCase.licenseCostPerUser || getDefaultLicenseCost(products);
+    licenseCost = licenseCount * licenseCostPerUser * months;
+  }
+  
+  if (costModel === 'ACR' || costModel === 'Hybrid') {
+    acrMonthlySpend = useCase.acrMonthlySpend || getDefaultACRSpend(products, useCaseName);
+    acrCost = acrMonthlySpend * months;
+  }
+  
+  // Calculate implementation cost using the new bucketing system
+  if (!implementationCost || implementationCost === 0) {
+    const bucket = getImplementationCostBucket(useCase);
+    implementationCost = bucket.cost;
+  }
+  
+  const totalInvestment = licenseCost + acrCost + implementationCost;
+  
+  console.log('  💰 Investment Breakdown:');
+  console.log('    - License Cost:', licenseCost, `(${licenseCount} users @ $${licenseCostPerUser}/mo)`);
+  console.log('    - ACR Cost:', acrCost, `($${acrMonthlySpend}/mo)`);
+  console.log('    - Implementation:', implementationCost);
+  console.log('    - TOTAL:', totalInvestment);
+  
+  return {
+    licenseCost,
+    licenseCount,
+    licenseCostPerUser,
+    acrCost,
+    acrMonthlySpend,
+    implementationCost,
+    totalInvestment,
+    costModel
+  };
 }
 
 /**
