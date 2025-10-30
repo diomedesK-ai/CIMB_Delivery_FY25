@@ -31,8 +31,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>AI First Banking - CIMB</title>
-        <meta name="description" content="Strategic AI transformation roadmap and value creation across CIMB" />
+        <title>AI Banking Delivery Platform</title>
+        <meta name="description" content="Strategic AI transformation roadmap and value creation for banking operations" />
         <meta name="generator" content="v0.dev" />
       </head>
       <body>

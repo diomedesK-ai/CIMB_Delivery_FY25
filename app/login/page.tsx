@@ -45,7 +45,7 @@ export default function LoginPage() {
             </div>
             <CardTitle className="text-2xl font-light tracking-tight text-gray-900">Welcome Back</CardTitle>
             <CardDescription className="text-sm text-gray-500">
-              Sign in to access the CIMB Delivery Dashboard
+              Sign in to access the Banking Delivery Platform
             </CardDescription>
           </CardHeader>
           <CardContent className="px-8 pb-8">
@@ -94,7 +94,7 @@ export default function LoginPage() {
         
         {/* Footer */}
         <div className="text-center mt-6">
-          <p className="text-xs text-gray-400">© 2025 CIMB Group. All rights reserved.</p>
+          <p className="text-xs text-gray-400">© 2025 Banking Delivery Platform. All rights reserved.</p>
         </div>
       </div>
     </div>

@@ -50,12 +50,10 @@ export function SidebarNavigation({ children }: { children: React.ReactNode }) {
         <Sidebar>
           <SidebarHeader className="border-b pb-2">
             <div className="flex items-center gap-3 px-4 py-3">
-              <img 
-                src="/images/cimb-emblem.jpg" 
-                alt="CIMB Logo" 
-                className="h-10 w-10 object-contain"
-              />
-              <div className="font-semibold text-lg text-gray-800">CIMB</div>
+              <div className="w-9 h-9 rounded-md bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
+                <span className="text-white text-sm font-light">AI</span>
+              </div>
+              <div className="font-medium text-base text-gray-800">Banking Delivery</div>
             </div>
           </SidebarHeader>
           <SidebarContent>

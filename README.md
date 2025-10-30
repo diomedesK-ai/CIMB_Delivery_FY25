@@ -1,6 +1,6 @@
-# CIMB Delivery Dashboard
+# AI Banking Delivery Platform
 
-A comprehensive dashboard for tracking AI initiatives, dependencies, and value creation across CIMB.
+A comprehensive dashboard for tracking AI initiatives, dependencies, and value creation in banking operations.
 
 ## Features
 

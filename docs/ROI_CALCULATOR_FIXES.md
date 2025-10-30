@@ -291,3 +291,4 @@ otherAzureCost = azureOpenAIMonthly * 1.0 * 12 * years
 
 
 
+
